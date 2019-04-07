@@ -1,0 +1,18 @@
+
+#端口号
+server:
+  port: 8081
+  
+#数据库链接设置
+spring:
+ datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/subject?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    username: root
+    password: 
+
+#整合Mybatis
+mybatis:
+  type-aliases-package: com.subject.model #  mybatis 对应的 .xml文件路径
+  mapper-locations: classpath:mapper/*.xml #  多层级目录  mapper-locations: classpath:mapper/**/**.xml
+  

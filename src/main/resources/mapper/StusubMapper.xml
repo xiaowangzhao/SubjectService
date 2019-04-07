@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.subject.dao.StusubMapper" >
+  <resultMap id="BaseResultMap" type="com.subject.model.Stusub" >
+    <id column="stusubid" property="stusubid" jdbcType="BIGINT" />
+    <result column="stuid" property="stuid" jdbcType="VARCHAR" />
+    <result column="subid" property="subid" jdbcType="BIGINT" />
+    <result column="pickorder" property="pickorder" jdbcType="SMALLINT" />
+    <result column="pickflag" property="pickflag" jdbcType="CHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="operatedtime" property="operatedtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_stusub
+    where stusubid = #{stusubid,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.subject.model.Stusub" >
+    insert into tb_stusub (stusubid, stuid, subid, 
+      pickorder, pickflag, operator, 
+      operatedtime)
+    values (#{stusubid,jdbcType=BIGINT}, #{stuid,jdbcType=VARCHAR}, #{subid,jdbcType=BIGINT}, 
+      #{pickorder,jdbcType=SMALLINT}, #{pickflag,jdbcType=CHAR}, #{operator,jdbcType=VARCHAR}, 
+      #{operatedtime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.subject.model.Stusub" >
+    update tb_stusub
+    set stuid = #{stuid,jdbcType=VARCHAR},
+      subid = #{subid,jdbcType=BIGINT},
+      pickorder = #{pickorder,jdbcType=SMALLINT},
+      pickflag = #{pickflag,jdbcType=CHAR},
+      operator = #{operator,jdbcType=VARCHAR},
+      operatedtime = #{operatedtime,jdbcType=TIMESTAMP}
+    where stusubid = #{stusubid,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select stusubid, stuid, subid, pickorder, pickflag, operator, operatedtime
+    from tb_stusub
+    where stusubid = #{stusubid,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select stusubid, stuid, subid, pickorder, pickflag, operator, operatedtime
+    from tb_stusub
+  </select>
+</mapper>

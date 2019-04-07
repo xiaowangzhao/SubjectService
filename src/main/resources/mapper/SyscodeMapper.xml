@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.subject.dao.SyscodeMapper" >
+  <resultMap id="BaseResultMap" type="com.subject.model.Syscode" >
+    <id column="codeid" property="codeid" jdbcType="BIGINT" />
+    <result column="codeno" property="codeno" jdbcType="VARCHAR" />
+    <result column="codename" property="codename" jdbcType="VARCHAR" />
+    <result column="codevalue" property="codevalue" jdbcType="VARCHAR" />
+    <result column="codecontent" property="codecontent" jdbcType="VARCHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="operatedtime" property="operatedtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_syscode
+    where codeid = #{codeid,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.subject.model.Syscode" >
+    insert into tb_syscode (codeid, codeno, codename, 
+      codevalue, codecontent, operator, 
+      operatedtime)
+    values (#{codeid,jdbcType=BIGINT}, #{codeno,jdbcType=VARCHAR}, #{codename,jdbcType=VARCHAR}, 
+      #{codevalue,jdbcType=VARCHAR}, #{codecontent,jdbcType=VARCHAR}, #{operator,jdbcType=VARCHAR}, 
+      #{operatedtime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.subject.model.Syscode" >
+    update tb_syscode
+    set codeno = #{codeno,jdbcType=VARCHAR},
+      codename = #{codename,jdbcType=VARCHAR},
+      codevalue = #{codevalue,jdbcType=VARCHAR},
+      codecontent = #{codecontent,jdbcType=VARCHAR},
+      operator = #{operator,jdbcType=VARCHAR},
+      operatedtime = #{operatedtime,jdbcType=TIMESTAMP}
+    where codeid = #{codeid,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select codeid, codeno, codename, codevalue, codecontent, operator, operatedtime
+    from tb_syscode
+    where codeid = #{codeid,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select codeid, codeno, codename, codevalue, codecontent, operator, operatedtime
+    from tb_syscode
+  </select>
+</mapper>

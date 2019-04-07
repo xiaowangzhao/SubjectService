@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.subject.dao.SysarguMapper" >
+  <resultMap id="BaseResultMap" type="com.subject.model.Sysargu" >
+    <id column="arguid" property="arguid" jdbcType="BIGINT" />
+    <result column="arguname" property="arguname" jdbcType="VARCHAR" />
+    <result column="argutype" property="argutype" jdbcType="VARCHAR" />
+    <result column="arguvalue" property="arguvalue" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="operatedtime" property="operatedtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_sysargu
+    where arguid = #{arguid,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.subject.model.Sysargu" >
+    insert into tb_sysargu (arguid, arguname, argutype, 
+      arguvalue, remark, operator, 
+      operatedtime)
+    values (#{arguid,jdbcType=BIGINT}, #{arguname,jdbcType=VARCHAR}, #{argutype,jdbcType=VARCHAR}, 
+      #{arguvalue,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{operator,jdbcType=VARCHAR}, 
+      #{operatedtime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.subject.model.Sysargu" >
+    update tb_sysargu
+    set arguname = #{arguname,jdbcType=VARCHAR},
+      argutype = #{argutype,jdbcType=VARCHAR},
+      arguvalue = #{arguvalue,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      operator = #{operator,jdbcType=VARCHAR},
+      operatedtime = #{operatedtime,jdbcType=TIMESTAMP}
+    where arguid = #{arguid,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select arguid, arguname, argutype, arguvalue, remark, operator, operatedtime
+    from tb_sysargu
+    where arguid = #{arguid,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select arguid, arguname, argutype, arguvalue, remark, operator, operatedtime
+    from tb_sysargu
+  </select>
+
+  <select id="selectArguvalueByName" resultType="String" >
+    select arguvalue
+    from tb_sysargu where arguname = #{arguname}
+  </select>
+</mapper>

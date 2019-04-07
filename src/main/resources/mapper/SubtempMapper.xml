@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.subject.dao.SubtempMapper" >
+  <resultMap id="BaseResultMap" type="com.subject.model.Subtemp" >
+    <id column="subid" property="subid" jdbcType="BIGINT" />
+    <result column="subname" property="subname" jdbcType="VARCHAR" />
+    <result column="usedyear" property="usedyear" jdbcType="CHAR" />
+    <result column="subkind" property="subkind" jdbcType="CHAR" />
+    <result column="subsource" property="subsource" jdbcType="CHAR" />
+    <result column="subtype" property="subtype" jdbcType="CHAR" />
+    <result column="isoutschool" property="isoutschool" jdbcType="SMALLINT" />
+    <result column="tid" property="tid" jdbcType="CHAR" />
+    <result column="asstid" property="asstid" jdbcType="CHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="subdirection" property="subdirection" jdbcType="CHAR" />
+    <result column="subsort" property="subsort" jdbcType="CHAR" />
+    <result column="summary" property="summary" jdbcType="LONGVARCHAR" />
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+    <result column="requirement" property="requirement" jdbcType="LONGVARCHAR" />
+    <result column="refpapers" property="refpapers" jdbcType="LONGVARCHAR" />
+    <result column="subprog" property="subprog" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from tb_subtemp
+    where subid = #{subid,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.subject.model.Subtemp" >
+    insert into tb_subtemp (subid, subname, usedyear, 
+      subkind, subsource, subtype, 
+      isoutschool, tid, asstid, 
+      status, subdirection, subsort, 
+      summary, content, requirement, 
+      refpapers, subprog)
+    values (#{subid,jdbcType=BIGINT}, #{subname,jdbcType=VARCHAR}, #{usedyear,jdbcType=CHAR}, 
+      #{subkind,jdbcType=CHAR}, #{subsource,jdbcType=CHAR}, #{subtype,jdbcType=CHAR}, 
+      #{isoutschool,jdbcType=SMALLINT}, #{tid,jdbcType=CHAR}, #{asstid,jdbcType=CHAR}, 
+      #{status,jdbcType=CHAR}, #{subdirection,jdbcType=CHAR}, #{subsort,jdbcType=CHAR}, 
+      #{summary,jdbcType=LONGVARCHAR}, #{content,jdbcType=LONGVARCHAR}, #{requirement,jdbcType=LONGVARCHAR}, 
+      #{refpapers,jdbcType=LONGVARCHAR}, #{subprog,jdbcType=LONGVARCHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.subject.model.Subtemp" >
+    update tb_subtemp
+    set subname = #{subname,jdbcType=VARCHAR},
+      usedyear = #{usedyear,jdbcType=CHAR},
+      subkind = #{subkind,jdbcType=CHAR},
+      subsource = #{subsource,jdbcType=CHAR},
+      subtype = #{subtype,jdbcType=CHAR},
+      isoutschool = #{isoutschool,jdbcType=SMALLINT},
+      tid = #{tid,jdbcType=CHAR},
+      asstid = #{asstid,jdbcType=CHAR},
+      status = #{status,jdbcType=CHAR},
+      subdirection = #{subdirection,jdbcType=CHAR},
+      subsort = #{subsort,jdbcType=CHAR},
+      summary = #{summary,jdbcType=LONGVARCHAR},
+      content = #{content,jdbcType=LONGVARCHAR},
+      requirement = #{requirement,jdbcType=LONGVARCHAR},
+      refpapers = #{refpapers,jdbcType=LONGVARCHAR},
+      subprog = #{subprog,jdbcType=LONGVARCHAR}
+    where subid = #{subid,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select subid, subname, usedyear, subkind, subsource, subtype, isoutschool, tid, asstid, 
+    status, subdirection, subsort, summary, content, requirement, refpapers, subprog
+    from tb_subtemp
+    where subid = #{subid,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select subid, subname, usedyear, subkind, subsource, subtype, isoutschool, tid, asstid, 
+    status, subdirection, subsort, summary, content, requirement, refpapers, subprog
+    from tb_subtemp
+  </select>
+</mapper>

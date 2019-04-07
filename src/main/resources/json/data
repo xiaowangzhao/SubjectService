@@ -1,0 +1,42 @@
+{
+  "subject":{
+    "subname": "asdf",
+    "usedyear": "2016",
+    "subkind": "subkind",
+    "subsource": "subsource",
+    "subtype": "subtype",
+    "isoutschool": "1",
+    "tid": "1000",
+    "asstid": "1555",
+    "status": "0",
+    "subdirection": "sdds",
+    "subsort": "adsd",
+    "subprog": "ads"
+  },
+  "progress":[
+    {"proid":"22","checkopinion":"11","content":"22","inorder": "0"},
+    {"proid":"23","checkopinion":"12","content":"2223","inorder": "2"}
+  ],
+  "specid":"003"
+}
+
+{
+  "subspecs": [
+    {"subid": 12, "specid": "103"},
+    {"subid": 13, "specid": "003"}
+  ]
+}
+
+{
+  "subspecs": [
+    {"subid": 15, "specid": "100", "auditflag": "1"},
+    {"subid": 16, "specid": "100", "auditflag": "1"}
+  ]
+}
+
+{
+  "subspecs": [
+    {"subid": 14, "specid": "100","auditoption": "审核不通过"},
+    {"subid": 16, "specid": "100","auditoption": "审核不通过"}
+  ]
+}

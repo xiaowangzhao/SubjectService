@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.subject.dao.SubjectMapper" >
+  <resultMap id="SubjectResultMap" type="com.subject.model.Subject" >
+    <id column="subid" property="subid" jdbcType="BIGINT" />
+    <result column="subname" property="subname" jdbcType="VARCHAR" />
+    <result column="usedyear" property="usedyear" jdbcType="CHAR" />
+    <result column="subkind" property="subkind" jdbcType="CHAR" />
+    <result column="subsource" property="subsource" jdbcType="CHAR" />
+    <result column="subtype" property="subtype" jdbcType="CHAR" />
+    <result column="isoutschool" property="isoutschool" jdbcType="SMALLINT" />
+    <result column="tid" property="tid" jdbcType="CHAR" />
+    <result column="asstid" property="asstid" jdbcType="CHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="subdirection" property="subdirection" jdbcType="CHAR" />
+    <result column="subsort" property="subsort" jdbcType="CHAR" />
+    <result column="summary" property="summary" jdbcType="LONGVARCHAR" />
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+    <result column="requirement" property="requirement" jdbcType="LONGVARCHAR" />
+    <result column="refpapers" property="refpapers" jdbcType="LONGVARCHAR" />
+    <result column="subprog" property="subprog" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <delete id="delSubject" parameterType="java.lang.Long" >
+    delete from tb_subject
+    where subid = #{subid,jdbcType=BIGINT}
+  </delete>
+  <insert id="insertSubject" useGeneratedKeys="true" keyProperty="subid" parameterType="com.subject.model.Subject" >
+    insert into tb_subject (subid, subname, usedyear, 
+      subkind, subsource, subtype, 
+      isoutschool, tid, asstid, 
+      status, subdirection, subsort, 
+      summary, content, requirement, 
+      refpapers, subprog)
+    values (#{subid,jdbcType=BIGINT}, #{subname,jdbcType=VARCHAR}, #{usedyear,jdbcType=CHAR}, 
+      #{subkind,jdbcType=CHAR}, #{subsource,jdbcType=CHAR}, #{subtype,jdbcType=CHAR}, 
+      #{isoutschool,jdbcType=SMALLINT}, #{tid,jdbcType=CHAR}, #{asstid,jdbcType=CHAR}, 
+      #{status,jdbcType=CHAR}, #{subdirection,jdbcType=CHAR}, #{subsort,jdbcType=CHAR}, 
+      #{summary,jdbcType=LONGVARCHAR}, #{content,jdbcType=LONGVARCHAR}, #{requirement,jdbcType=LONGVARCHAR}, 
+      #{refpapers,jdbcType=LONGVARCHAR}, #{subprog,jdbcType=LONGVARCHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.subject.model.Subject" >
+    update tb_subject
+    set subname = #{subname,jdbcType=VARCHAR},
+      usedyear = #{usedyear,jdbcType=CHAR},
+      subkind = #{subkind,jdbcType=CHAR},
+      subsource = #{subsource,jdbcType=CHAR},
+      subtype = #{subtype,jdbcType=CHAR},
+      isoutschool = #{isoutschool,jdbcType=SMALLINT},
+      tid = #{tid,jdbcType=CHAR},
+      asstid = #{asstid,jdbcType=CHAR},
+      status = #{status,jdbcType=CHAR},
+      subdirection = #{subdirection,jdbcType=CHAR},
+      subsort = #{subsort,jdbcType=CHAR},
+      summary = #{summary,jdbcType=LONGVARCHAR},
+      content = #{content,jdbcType=LONGVARCHAR},
+      requirement = #{requirement,jdbcType=LONGVARCHAR},
+      refpapers = #{refpapers,jdbcType=LONGVARCHAR},
+      subprog = #{subprog,jdbcType=LONGVARCHAR}
+    where subid = #{subid,jdbcType=BIGINT}
+  </update>
+  <select id="getSubject" resultMap="SubjectResultMap" parameterType="java.lang.Long" >
+    select subid, subname, usedyear, subkind, subsource, subtype, isoutschool, tid, asstid, 
+    status, subdirection, subsort, summary, content, requirement, refpapers, subprog
+    from tb_subject
+    where subid = #{subid,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="SubjectResultMap" >
+    select subid, subname, usedyear, subkind, subsource, subtype, isoutschool, tid, asstid, 
+    status, subdirection, subsort, summary, content, requirement, refpapers, subprog
+    from tb_subject
+  </select>
+
+  <select id="getSubjects" resultMap="SubjectResultMap">
+    select subid, subname, usedyear, subkind, subsource, subtype, isoutschool, tid, asstid,
+    status, subdirection, subsort, summary, content, requirement, refpapers, subprog
+    from tb_subject
+    where tid = #{tid}
+  </select>
+
+  <select id="selectSubByDirection" resultMap="SubjectResultMap">
+    select subid, tid
+    from tb_subject
+    where subdirection = #{subdirection} and status = '1'
+    order by tid desc
+  </select>
+
+  <!--提交课题（修改课题提交标志为1）-->
+  <update id="submitSubject" parameterType="Long">
+        UPDATE tb_subject
+        SET status = 1
+        WHERE subid=#{subid}
+  </update>
+
+  <!--修改课题-->
+  <update id="updateSubject" parameterType="com.subject.model.Subject">
+    UPDATE tb_subject
+    <set>
+      <if test="subject.subname != null">subname = #{subject.subname},</if>
+      <if test="subject.usedyear != null">usedyear = #{subject.usedyear},</if>
+      <if test="subject.subkind != null">subkind = #{subject.subkind},</if>
+      <if test="subject.subsource != null">subsource = #{subject.subsource},</if>
+      <if test="subject.subtype != null">subtype = #{subject.subtype},</if>
+      <if test="subject.isoutschool != null">isoutschool = #{subject.isoutschool},</if>
+      <if test="subject.tid != null">tid = #{subject.tid},</if>
+      <if test="subject.asstid != null">asstid = #{subject.asstid},</if>
+      <if test="subject.status != null">status = #{subject.status},</if>
+      <if test="subject.subdirection != null">subdirection = #{subject.subdirection},</if>
+      <if test="subject.subsort != null">subsort = #{subject.subsort},</if>
+      <if test="subject.summary != null">summary = #{subject.summary},</if>
+      <if test="subject.content != null">content = #{subject.content},</if>
+      <if test="subject.requirement != null">requirement = #{subject.requirement},</if>
+      <if test="subject.refpapers != null">refpapers = #{subject.refpapers},</if>
+      <if test="subject.subprog != null">subprog = #{subject.subprog}</if>
+    </set>
+    WHERE subid=#{subject.subid}
+  </update>
+
+  <select id="selectSubmitSubSum" resultType="Integer" parameterType="String">
+    select count(subid)
+    from tb_subject
+    where tid = #{tid}
+  </select>
+
+  <select id="selectAuditSubSum" resultType="Integer" parameterType="String">
+    select count(tid)
+    from tb_reviewsubject
+    where tid = #{tid}
+  </select>
+
+  <select id="selectNotAuditSubSum" resultType="Integer" parameterType="String">
+    select count(tid)
+    from tb_reviewsubject
+    where tid = #{tid} and reviewopinion is null or reviewopinion='';
+  </select>
+</mapper>

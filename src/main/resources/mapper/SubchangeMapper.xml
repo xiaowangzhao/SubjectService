@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.subject.dao.SubchangeMapper" >
+  <resultMap id="BaseResultMap" type="com.subject.model.Subchange" >
+    <id column="stuid" property="stuid" jdbcType="CHAR" />
+    <result column="oldsubid" property="oldsubid" jdbcType="BIGINT" />
+    <result column="newsubid" property="newsubid" jdbcType="BIGINT" />
+    <result column="submitflag" property="submitflag" jdbcType="CHAR" />
+    <result column="teaconfirm" property="teaconfirm" jdbcType="CHAR" />
+    <result column="auditflag" property="auditflag" jdbcType="CHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="operatedtime" property="operatedtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from tb_subchange
+    where stuid = #{stuid,jdbcType=CHAR}
+  </delete>
+  <insert id="insert" parameterType="com.subject.model.Subchange" >
+    insert into tb_subchange (stuid, oldsubid, newsubid, 
+      submitflag, teaconfirm, auditflag, 
+      operator, operatedtime)
+    values (#{stuid,jdbcType=CHAR}, #{oldsubid,jdbcType=BIGINT}, #{newsubid,jdbcType=BIGINT}, 
+      #{submitflag,jdbcType=CHAR}, #{teaconfirm,jdbcType=CHAR}, #{auditflag,jdbcType=CHAR}, 
+      #{operator,jdbcType=VARCHAR}, #{operatedtime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.subject.model.Subchange" >
+    update tb_subchange
+    set oldsubid = #{oldsubid,jdbcType=BIGINT},
+      newsubid = #{newsubid,jdbcType=BIGINT},
+      submitflag = #{submitflag,jdbcType=CHAR},
+      teaconfirm = #{teaconfirm,jdbcType=CHAR},
+      auditflag = #{auditflag,jdbcType=CHAR},
+      operator = #{operator,jdbcType=VARCHAR},
+      operatedtime = #{operatedtime,jdbcType=TIMESTAMP}
+    where stuid = #{stuid,jdbcType=CHAR}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select stuid, oldsubid, newsubid, submitflag, teaconfirm, auditflag, operator, operatedtime
+    from tb_subchange
+    where stuid = #{stuid,jdbcType=CHAR}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select stuid, oldsubid, newsubid, submitflag, teaconfirm, auditflag, operator, operatedtime
+    from tb_subchange
+  </select>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.subject.dao.SubspecMapper" >
+  <resultMap id="BaseResultMap" type="com.subject.model.Subspec" >
+    <id column="subspecid" property="subspecid" jdbcType="BIGINT" />
+    <result column="subid" property="subid" jdbcType="BIGINT" />
+    <result column="specid" property="specid" jdbcType="CHAR" />
+    <result column="auditoption" property="auditoption" jdbcType="VARCHAR" />
+    <result column="auditflag" property="auditflag" jdbcType="CHAR" />
+    <result column="releaseflag" property="releaseflag" jdbcType="CHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="operatedtime" property="operatedtime" jdbcType="TIMESTAMP" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="deleteBySubid" parameterType="java.lang.Long" >
+    delete from tb_subspec
+    where subid = #{subid,jdbcType=BIGINT}
+  </delete>
+  <insert id="insertSubspec" parameterType="com.subject.model.Subspec" >
+    insert into tb_subspec (subspecid, subid, specid, 
+      auditoption, auditflag, releaseflag, 
+      operator, operatedtime, remark
+      )
+    values (#{subspecid,jdbcType=BIGINT}, #{subid,jdbcType=BIGINT}, #{specid,jdbcType=CHAR}, 
+      #{auditoption,jdbcType=VARCHAR}, #{auditflag,jdbcType=CHAR}, #{releaseflag,jdbcType=CHAR}, 
+      #{operator,jdbcType=VARCHAR}, #{operatedtime,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  <update id="updateSubspec" parameterType="com.subject.model.Subspec" >
+    update tb_subspec
+    <set>
+      <if test="subspec.subid != null">subid = #{subspec.subid,jdbcType=BIGINT},</if>
+      <if test="subspec.specid != null">specid = #{subspec.specid,jdbcType=CHAR},</if>
+      <if test="subspec.auditoption != null">auditoption = #{subspec.auditoption,jdbcType=VARCHAR},</if>
+      <if test="subspec.auditflag != null">auditflag = #{subspec.auditflag,jdbcType=CHAR},</if>
+      <if test="subspec.releaseflag != null">releaseflag = #{subspec.releaseflag,jdbcType=CHAR},</if>
+      <if test="subspec.remark != null">remark = #{subspec.remark,jdbcType=VARCHAR}</if>
+      <if test="subspec.operator != null">operator = #{subspec.operator,jdbcType=VARCHAR},</if>
+      <if test="subspec.operatedtime != null">operatedtime = #{subspec.operatedtime,jdbcType=TIMESTAMP}</if>
+    </set>
+    where subspecid = #{subspec.subspecid,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap"  >
+    select subspecid, subid, specid, auditoption, auditflag, releaseflag, operator, operatedtime,
+    remark
+    from tb_subspec
+    where proid = #{proid,jdbcType=BIGINT}
+  </select>
+
+  <select id="findProgress" resultType="Long"  >
+    select subspecid
+    from tb_subspec
+    where subid = #{subid,jdbcType=BIGINT} and specid = #{specid,jdbcType=CHAR}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select subspecid, subid, specid, auditoption, auditflag, releaseflag, operator, operatedtime, 
+    remark
+    from tb_subspec
+  </select>
+
+  <!--批量审核课题-->
+  <update id="submitAuditBatchPass" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      update tb_subspec
+      SET  auditflag='1',operatedtime=now()
+      <where>
+        subid = #{item.subid} AND specid=#{item.specid}
+      </where>
+    </foreach>
+  </update>
+
+  <!--批量审核课题(审核未通过)-->
+  <update id="submitAuditBatchUnPass" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      update tb_subspec
+      SET  auditflag='0',auditoption=#{item.auditoption},operatedtime=now()
+      <where>
+        subid = #{item.subid} and specid=#{item.specid}
+      </where>
+    </foreach>
+  </update>
+
+  <!--批量发布课题-->
+  <update id="releasesubject" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      update tb_subspec
+      SET  releaseflag='1',operatedtime=now()
+      <where>
+        subid = #{item.subid} and specid=#{item.specid}
+      </where>
+    </foreach>
+  </update>
+
+  <!--恢复课题状态到“审核未通过”-->
+  <update id="restoreSubjectStatus" parameterType="Long">
+        update tb_subspec
+        SET auditflag='0',releaseflag='0'
+        WHERE subid=#{subid}
+  </update>
+</mapper>

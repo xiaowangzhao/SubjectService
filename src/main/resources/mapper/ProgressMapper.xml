@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.subject.dao.ProgressMapper" >
+  <resultMap id="BaseResultMap" type="com.subject.model.Progress" >
+    <id column="proid" property="proid" jdbcType="BIGINT" />
+    <result column="subid" property="subid" jdbcType="BIGINT" />
+    <result column="inorder" property="inorder" jdbcType="SMALLINT" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="startendtime" property="startendtime" jdbcType="VARCHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+    <result column="operatedtime" property="operatedtime" jdbcType="TIMESTAMP" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="deleteProgressBySubid" parameterType="java.lang.Long" >
+  delete from tb_progress
+  where subid = #{subid,jdbcType=BIGINT}
+</delete>
+  <insert id="insertProgress" parameterType="com.subject.model.Progress" >
+    insert into tb_progress (proid, subid, inorder, 
+      content, startendtime, operator, 
+      operatedtime, remarks)
+    values (#{proid,jdbcType=BIGINT}, #{subid,jdbcType=BIGINT}, #{inorder,jdbcType=SMALLINT}, 
+      #{content,jdbcType=VARCHAR}, #{startendtime,jdbcType=VARCHAR}, #{operator,jdbcType=VARCHAR}, 
+      #{operatedtime,jdbcType=TIMESTAMP}, #{remarks,jdbcType=VARCHAR})
+  </insert>
+
+  <!--批量增加进度-->
+  <insert id="addProgress" parameterType="java.util.List">
+    INSERT INTO tb_progress(subid,inorder,content,startendtime)
+    VALUES
+    <foreach collection="progress" item="item" index="index"  separator="," >
+      (
+      #{item.subid},
+      #{item.inorder},
+      #{item.content},
+      #{item.startendtime}
+      )
+    </foreach>
+  </insert>
+
+  <update id="updateProgress" parameterType="com.subject.model.Progress" >
+    update tb_progress
+    <set>
+      <if test="progress.subid != null">subid = #{progress.subid,jdbcType=BIGINT},</if>
+      <if test="progress.inorder != null">inorder = #{progress.inorder,jdbcType=SMALLINT},</if>
+      <if test="progress.content != null">content = #{progress.content,jdbcType=VARCHAR},</if>
+      <if test="progress.startendtime != null">startendtime = #{progress.startendtime,jdbcType=VARCHAR},</if>
+      <if test="progress.remarks != null">remarks = #{progress.remarks,jdbcType=VARCHAR}</if>
+      <if test="progress.operator != null">operator = #{progress.operator,jdbcType=VARCHAR},</if>
+      <if test="progress.operatedtime != null">operatedtime = #{progress.operatedtime,jdbcType=TIMESTAMP}</if>
+    </set>
+    where proid = #{progress.proid,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select proid, subid, inorder, content, startendtime, operator, operatedtime, remarks
+    from tb_progress
+    where proid = #{proid,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectProgress" resultType="Long"  >
+    select proid
+    from tb_progress
+    where subid = #{subid,jdbcType=BIGINT} and inorder = #{inorder,jdbcType=SMALLINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select proid, subid, inorder, content, startendtime, operator, operatedtime, remarks
+    from tb_progress
+  </select>
+
+
+</mapper>
