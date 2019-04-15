@@ -67,5 +67,9 @@
     from tb_progress
   </select>
 
-
+  <select id="selectProgressList" resultMap="BaseResultMap" >
+    select proid, subid, inorder, content, startendtime, remarks
+    from tb_progress
+    where subid = #{subid}
+  </select>
 </mapper>

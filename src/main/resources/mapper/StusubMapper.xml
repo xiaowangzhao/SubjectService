@@ -10,11 +10,11 @@
     <result column="operator" property="operator" jdbcType="VARCHAR" />
     <result column="operatedtime" property="operatedtime" jdbcType="TIMESTAMP" />
   </resultMap>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+  <delete id="deleteStusub" parameterType="java.lang.String" >
     delete from tb_stusub
-    where stusubid = #{stusubid,jdbcType=BIGINT}
+    where stuid = #{stuid} and pickflag is null or pickflag = '0';
   </delete>
-  <insert id="insert" parameterType="com.subject.model.Stusub" >
+  <insert id="insertStuSub" parameterType="com.subject.model.Stusub" >
     insert into tb_stusub (stusubid, stuid, subid, 
       pickorder, pickflag, operator, 
       operatedtime)
@@ -32,13 +32,37 @@
       operatedtime = #{operatedtime,jdbcType=TIMESTAMP}
     where stusubid = #{stusubid,jdbcType=BIGINT}
   </update>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select stusubid, stuid, subid, pickorder, pickflag, operator, operatedtime
+  <select id="selectStusub" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select stusubid, stuid, subid, pickorder, pickflag
     from tb_stusub
-    where stusubid = #{stusubid,jdbcType=BIGINT}
+    where subid = #{subid,jdbcType=BIGINT}
   </select>
   <select id="selectAll" resultMap="BaseResultMap" >
     select stusubid, stuid, subid, pickorder, pickflag, operator, operatedtime
     from tb_stusub
   </select>
+
+  <insert id="insertBatchStuSub" parameterType="java.util.List">
+    INSERT INTO tb_stusub(stuid, subid, pickorder)
+    VALUES
+    <foreach collection="stusubs" item="item" index="index"
+             separator="," >
+      (
+      #{item.stuid},
+      #{item.subid},
+      #{item.pickorder}
+      )
+    </foreach>
+  </insert>
+
+  <update id="updatePickflag">
+        UPDATE tb_stusub
+        SET pickflag = '1'
+        WHERE subid = #{subid} and stuid = #{stuid}
+  </update>
+  <update id="failPickStu">
+        UPDATE tb_stusub
+        SET pickflag = '0'
+        WHERE subid = #{subid} and stuid = #{stuid}
+  </update>
 </mapper>

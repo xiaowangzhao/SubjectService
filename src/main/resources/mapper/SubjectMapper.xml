@@ -38,6 +38,21 @@
       #{summary,jdbcType=LONGVARCHAR}, #{content,jdbcType=LONGVARCHAR}, #{requirement,jdbcType=LONGVARCHAR}, 
       #{refpapers,jdbcType=LONGVARCHAR}, #{subprog,jdbcType=LONGVARCHAR})
   </insert>
+
+  <insert id="insertSubjectTmep" useGeneratedKeys="true" keyProperty="subid" parameterType="com.subject.model.Subject" >
+    insert into tb_subtemp (subid, subname, usedyear,
+      subkind, subsource, subtype,
+      isoutschool, tid, asstid,
+      status, subdirection, subsort,
+      summary, content, requirement,
+      refpapers, subprog)
+    values (#{subid,jdbcType=BIGINT}, #{subname,jdbcType=VARCHAR}, #{usedyear,jdbcType=CHAR},
+      #{subkind,jdbcType=CHAR}, #{subsource,jdbcType=CHAR}, #{subtype,jdbcType=CHAR},
+      #{isoutschool,jdbcType=SMALLINT}, #{tid,jdbcType=CHAR}, #{asstid,jdbcType=CHAR},
+      #{status,jdbcType=CHAR}, #{subdirection,jdbcType=CHAR}, #{subsort,jdbcType=CHAR},
+      #{summary,jdbcType=LONGVARCHAR}, #{content,jdbcType=LONGVARCHAR}, #{requirement,jdbcType=LONGVARCHAR},
+      #{refpapers,jdbcType=LONGVARCHAR}, #{subprog,jdbcType=LONGVARCHAR})
+  </insert>
   <update id="updateByPrimaryKey" parameterType="com.subject.model.Subject" >
     update tb_subject
     set subname = #{subname,jdbcType=VARCHAR},
@@ -132,4 +147,39 @@
     from tb_reviewsubject
     where tid = #{tid} and reviewopinion is null or reviewopinion='';
   </select>
+
+  <!--按专业查看所有课题情况,其中参数specid不能为null或”“-->
+  <select id="selectSubsBySpec" resultMap="SubjectResultMap">
+        SELECT b.subid,b.status,b.isoutschool,b.subname,b.tid,b.asstid,a.auditoption,a.auditflag,a.releaseflag
+        FROM tb_subspec a,tb_subject b
+        WHERE a.specid=#{specid} AND a.subid=b.subid
+    </select>
+
+
+  <!--判断课题是否重复-->
+  <select id="selectSubjectRepeat" parameterType="String" resultMap="SubjectResultMap">
+        SELECT *
+        FROM tb_subject
+        WHERE   subname=#{subname} AND tid=#{tid}
+    </select>
+
+  <!--判断课题相似度-->
+  <select id="selectSubjectSim"  resultMap="SubjectResultMap">
+        SELECT  tid,subname
+        FROM tb_subject
+    </select>
+
+  <!--课题审核查询-->
+  <select id="selectSubsBySpecAndName" parameterType="String" resultType="com.subject.model.ReviewSubject">
+        SELECT subid, subname, tid, asstid, reviewerid, ifnull(reviewopinion,'') as reviewopinion
+        FROM v_subjectreview
+        WHERE specid=#{specid} AND subname LIKE '%${subname}%'
+    </select>
+
+  <!--判断课题的个数-->
+  <select id="selectSubjectCount" parameterType="String" resultType="Integer">
+        SELECT count(*)
+        FROM tb_subject
+        WHERE tid=#{tid}
+    </select>
 </mapper>

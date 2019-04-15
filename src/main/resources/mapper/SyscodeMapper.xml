@@ -41,4 +41,17 @@
     select codeid, codeno, codename, codevalue, codecontent, operator, operatedtime
     from tb_syscode
   </select>
+
+  <!--根据 codeid 获得 Syscode 信息-->
+  <select id="selectSyscodeById" resultType="com.subject.model.Syscode" parameterType="Integer">
+        SELECT  codeid, codeno, codename, codevalue, codecontent FROM tb_syscode WHERE codeid=#{codeid}
+    </select>
+
+  <select id="selectCode" resultMap="BaseResultMap" parameterType="String">
+        SELECT  codeid, codeno, codename, codevalue, codecontent FROM tb_syscode WHERE codeno=#{codeno} AND codevalue=#{codevalue}
+    </select>
+
+  <select id="selectCodeByCodeno" resultMap="BaseResultMap" parameterType="String">
+        SELECT  codename, codevalue, codecontent FROM tb_syscode WHERE codeno=#{codeno}
+    </select>
 </mapper>

@@ -9,7 +9,7 @@ public class Stusub {
 
     private Long subid;
 
-    private Short pickorder;
+    private String pickorder;
 
     private String pickflag;
 
@@ -41,11 +41,11 @@ public class Stusub {
         this.subid = subid;
     }
 
-    public Short getPickorder() {
+    public String getPickorder() {
         return pickorder;
     }
 
-    public void setPickorder(Short pickorder) {
+    public void setPickorder(String pickorder) {
         this.pickorder = pickorder;
     }
 
@@ -71,5 +71,18 @@ public class Stusub {
 
     public void setOperatedtime(Date operatedtime) {
         this.operatedtime = operatedtime;
+    }
+
+    @Override
+    public String toString() {
+        return "Stusub{" +
+                "stusubid=" + stusubid +
+                ", stuid='" + stuid + '\'' +
+                ", subid=" + subid +
+                ", pickorder=" + pickorder +
+                ", pickflag='" + pickflag + '\'' +
+                ", operator='" + operator + '\'' +
+                ", operatedtime=" + operatedtime +
+                '}';
     }
 }

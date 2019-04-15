@@ -72,4 +72,17 @@ public class Syscode {
     public void setOperatedtime(Date operatedtime) {
         this.operatedtime = operatedtime;
     }
+
+    @Override
+    public String toString() {
+        return "Syscode{" +
+                "codeid=" + codeid +
+                ", codeno='" + codeno + '\'' +
+                ", codename='" + codename + '\'' +
+                ", codevalue='" + codevalue + '\'' +
+                ", codecontent='" + codecontent + '\'' +
+                ", operator='" + operator + '\'' +
+                ", operatedtime=" + operatedtime +
+                '}';
+    }
 }

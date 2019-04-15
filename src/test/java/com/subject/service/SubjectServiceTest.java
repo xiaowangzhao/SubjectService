@@ -3,6 +3,7 @@ package com.subject.service;
 import com.subject.BaseTest;
 import com.subject.dto.Result;
 import com.subject.model.Progress;
+import com.subject.model.SubSim;
 import com.subject.model.Subject;
 import com.subject.model.Subspec;
 import org.junit.Test;
@@ -117,5 +118,50 @@ public class SubjectServiceTest extends BaseTest {
         subspecList.add(subspec1);
 
         System.out.println(subjectService.auditBarchSub(subspecList));
+    }
+
+    @Test
+    public void testComputesimilar() {
+        List<SubSim> subSimList = subjectService.computesimilar("1111", 0.9F);
+        for(SubSim subSim : subSimList) {
+            System.out.println(subSim);
+        }
+    }
+
+    @Test
+    public void testValidNewSubject() {
+        Subject subject = new Subject();
+        subject.setSubid(14L);
+        subject.setAsstid("003");
+        subject.setSubname("11");
+        subject.setContent("dsf");
+        subject.setIsoutschool(23);
+        subject.setRequirement("sdf");
+        subject.setRefpapers("sdf");
+        subject.setRequirement("sdf");
+        subject.setStatus("0");
+        subject.setSubkind("bbb");
+        subject.setSubdirection("1");
+        subject.setSubsource("adf");
+        subject.setSubsort("a");
+        subject.setSubtype("s");
+        subject.setSummary("asfd");
+        subject.setTid("002");
+        subject.setUsedyear("2016");
+        Progress progress = new Progress();
+        progress.setSubid(2l);
+        progress.setContent("sgsg");
+        progress.setInorder(0);
+        progress.setStartendtime("sfds");
+        Progress progress1 = new Progress();
+        progress1.setContent("sgsg");
+        progress1.setSubid(2l);
+        progress1.setInorder(1);
+        progress1.setStartendtime("sfds");
+        List<Progress> progressList = new ArrayList<>();
+        progressList.add(progress);
+        progressList.add(progress1);
+        String count = subjectService.validNewSubject(subject);
+        System.out.println(count);
     }
 }

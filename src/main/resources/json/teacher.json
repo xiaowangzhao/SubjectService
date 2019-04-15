@@ -2,11 +2,17 @@
   "teacher": [
     {
       "tid": "002",
-      "tname": "王老师"
+      "tname": "王老师",
+      "tdept": 3,
+      "tpost": 1,
+      "tdegree": 2
     },
     {
       "tid": "003",
-      "tname": "李老师"
+      "tname": "李老师",
+      "tdept": 3,
+      "tpost": 1,
+      "tdegree": 2
     }
   ]
 }

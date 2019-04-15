@@ -1,5 +1,7 @@
 package com.subject.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.subject.dao.ProgressMapper;
 import com.subject.dao.ReviewsubjectMapper;
 import com.subject.dao.SubjectMapper;
@@ -7,11 +9,15 @@ import com.subject.dao.SubspecMapper;
 import com.subject.model.*;
 import com.subject.service.SubjectService;
 import com.subject.service.SysarguService;
+import com.subject.util.JsonUtil;
+import com.subject.util.SimiComparator;
+import com.subject.util.Similarity;
 import com.subject.util.TeaSubComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 
@@ -39,13 +45,34 @@ public class SubjectServiceImpl implements SubjectService {
 
     /**
      * 根据 subid 获得 subject 信息
-     *
      * @param subid
      * @return
      */
     @Override
-    public Subject getSubject(Long subid) {
+    public Subject selectBySubid(Long subid) {
         return subjectMapper.getSubject(subid);
+    }
+
+    /**
+     *
+     *根据 subid 获得 subject ,progresslist，speid
+     * @param subid
+     * @return
+     */
+    @Override
+    public Map<String, Object> getSubject(Long subid) {
+        Map<String, Object> map = new HashMap<>();
+        try{
+            Subject subject = subjectMapper.getSubject(subid);
+            List<Progress> progressList = progressMapper.selectProgressList(subid);
+            String specid = subspecMapper.selectSpecid(subid);
+            map.put("subject", subject);
+            map.put("progressList", progressList);
+            map.put("specid", specid);
+        }catch (Exception e) {
+            System.out.println(e);
+        }
+        return map;
     }
 
     /**
@@ -59,6 +86,8 @@ public class SubjectServiceImpl implements SubjectService {
         return subjectMapper.getSubjects(tid);
     }
 
+
+
     /**
      * 查询所有课题
      * @return
@@ -70,6 +99,16 @@ public class SubjectServiceImpl implements SubjectService {
 
     /**
      * 删除课题
+     * @param subid
+     * @return
+     */
+    @Override
+    public int delSubjectBySubid(Long subid) {
+        return subjectMapper.delSubject(subid);
+    }
+
+    /**
+     * 删除课题,进程，所属专业
      * @param subid
      * @return
      */
@@ -96,6 +135,17 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public int submitSubject(long subid) {
         return subjectMapper.submitSubject(subid);
+    }
+
+    /**
+     * 提交课题到临时表
+     *
+     * @param subject
+     * @return
+     */
+    @Override
+    public int submitSubjectTemp(Subject subject) {
+        return subjectMapper.insertSubjectTmep(subject);
     }
 
     /**
@@ -266,13 +316,13 @@ public class SubjectServiceImpl implements SubjectService {
             try{
                 reviewsubjectMapper.deleteAll();
                 int subSums = subReviews.size();
-                Reviewsubject reviewsubject;
+                ReviewSubject reviewsubject;
                 for(int l = 0; l < subSums; l++) {
                     SubReview reviewTemp = subReviews.get(l);
                     String tid = reviewTemp.getTid();
                     teaSumForReview.put(tid, tid);
                     Long subid = Long.parseLong(reviewTemp.getSubid());
-                    reviewsubject = new Reviewsubject();
+                    reviewsubject = new ReviewSubject();
                     reviewsubject.setTid(tid);
                     reviewsubject.setSubid(subid);
                     reviewsubjectMapper.insert(reviewsubject);
@@ -320,6 +370,47 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     /**
+     * 通过tid， 获取教师所需要盲审的课题
+     * @param tid
+     * @return
+     */
+    @Override
+    public Map<String, Object> getTeaReviewSub(String tid) {
+        Map<String, Object> map = new HashMap<>();
+        List<ReviewSubject> reviewSubjects;
+        List<Subject> subjects = new ArrayList<>();
+        Subject subject = null;
+        try{
+            reviewSubjects = reviewsubjectMapper.selectByTid(tid);
+            for(ReviewSubject reviewSubject : reviewSubjects) {
+                long subid = reviewSubject.getSubid();
+                subject = subjectMapper.getSubject(subid);
+                subjects.add(subject);
+            }
+            map.put("reviewSubjects", reviewSubjects);
+            map.put("subjects", subjects);
+        }catch (Exception e) {
+            System.out.println(e);
+        }
+        return map;
+    }
+
+    /**
+     * 更新教师盲审意见
+     * @param reviewSubjects
+     * @return
+     */
+    @Override
+    public int updateReviewOpinion(List<ReviewSubject> reviewSubjects) {
+        try{
+            reviewsubjectMapper.updateReviewOpinion(reviewSubjects);
+        }catch (Exception e) {
+            return 0;
+        }
+        return 1;
+    }
+
+    /**
      * 恢复课题状态到“审核未通过”
      * @param subid
      * @return
@@ -349,6 +440,108 @@ public class SubjectServiceImpl implements SubjectService {
         subNumByTea.setSubmitSubSum(subjectMapper.selectSubmitSubSum(tid));
         subNumByTea.setNotAuditSubSum(subjectMapper.selectNotAuditSubSum(tid));
         return subNumByTea;
+    }
+
+    @Override
+    public List<Subject> selectSubsBySpec(String specid) throws IOException {
+        return null;
+    }
+
+    /**
+     *  保存前校验
+     * @param subject
+     */
+    @Override
+    @Transactional
+    public String validNewSubject(Subject subject) {
+        String tid = subject.getTid();
+        String subname = subject.getSubname();
+        //判断课题数是否超过10个，若超过，则不允许新增
+        int subjectCount = subjectMapper.selectSubjectCount(tid);
+        if(subjectCount >= 10) {
+            return "您当前库中的课题数已经10个，不允许再次增加！";
+        }
+
+        //判断课题是否重复
+        if(subjectMapper.selectSubjectRepeat(tid, subname).size() != 0) {
+            return "您的课题：'"+subname+"'在当前库中已存在，不允许重复！";
+        }
+
+        //题目相似度若超过0.9，则认定为重复
+        List<SubSim> subSims = computesimilar(subject.getSubname(), 0.9f);
+        if(subSims.size() != 0){
+            String errstr = "";
+            for(Iterator<SubSim> it = subSims.iterator(); it.hasNext();){
+                SubSim subSim = it.next();
+                errstr = errstr + "/" + subSim.getTid() + ":" + subSim.getSubname() + "/";
+            }
+            if(!errstr.equals("")){
+                errstr = "[提交失败]系统中已存在"+subSims.size()+"个相同的课题:"+"["+errstr+"]请修改课题名后再提交！";
+               return errstr;
+            }
+        }
+        return "1";
+    }
+
+    @Override
+    public int selectSubjectCount(String tid) {
+        return subjectMapper.selectSubjectCount(tid);
+    }
+
+    /**
+     * 题目相似度比较
+     * @param subname 为被比较的课题名
+     * @param threshold 相似度的阈值
+     * @return  List<SubSimBean> 为与subname比较的题目及相似度，其中相似度大于threshold
+     */
+    @Override
+    public List<SubSim> computesimilar(String subname, float threshold) {
+        List<SubSim> ret = new ArrayList<>();
+        if(subname == null){
+            subname = "";
+        }
+        List<Subject> subjectList = subjectMapper.selectSubjectSim();
+        if(subjectList.size() != 0){
+            for(Subject subject : subjectList){
+                Float simd = Similarity.calculatesimilar(subject.getSubname(),subname);
+                if(simd < threshold) continue;
+                String tid = subject.getTid();
+                SubSim temp = new SubSim();
+                temp.setSubname(subject.getSubname());
+                temp.setSimilard(simd);
+                temp.setTid(tid);
+                ret.add(temp);
+            }
+        }
+        SimiComparator comparator = new SimiComparator();
+        Collections.sort(ret,comparator);
+        return ret;
+    }
+
+    /**
+     * 按专业查询课题
+     * @param specid
+     * @param tdept
+     * @param tname
+     * @return
+     * @throws IOException
+     */
+    public List<Subject> selectSubsBySpec(String specid, String tdept, String tname) throws IOException {
+        List<Subject> subjectList = subjectMapper.selectSubsBySpec("specid");
+        JSONArray jsonArray = JsonUtil.getTeacher();
+        for(Subject subject : subjectList) {
+            String tid = subject.getTid();
+            for(Object obj : jsonArray) {
+                JSONObject jsonOb = (JSONObject) obj;
+                String teacherid = jsonOb.getString("tid");
+                if(tid.equals(teacherid)) {
+
+                }
+            }
+        }
+
+
+        return null;
     }
 
 }

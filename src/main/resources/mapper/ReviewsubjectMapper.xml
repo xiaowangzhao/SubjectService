@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.subject.dao.ReviewsubjectMapper" >
-  <resultMap id="BaseResultMap" type="com.subject.model.Reviewsubject" >
+  <resultMap id="BaseResultMap" type="com.subject.model.ReviewSubject" >
     <id column="tid" property="tid" jdbcType="CHAR" />
     <id column="subid" property="subid" jdbcType="BIGINT" />
     <result column="reviewopinion" property="reviewopinion" jdbcType="LONGVARCHAR" />
@@ -16,17 +16,27 @@
     delete from tb_reviewsubject
   </delete>
 
-  <insert id="insert" parameterType="com.subject.model.Reviewsubject" >
+  <insert id="insert" parameterType="com.subject.model.ReviewSubject" >
     insert into tb_reviewsubject (tid, subid, reviewopinion
       )
     values (#{tid,jdbcType=CHAR}, #{subid,jdbcType=BIGINT}, #{reviewopinion,jdbcType=LONGVARCHAR}
       )
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.subject.model.Reviewsubject" >
-    update tb_reviewsubject
-    set reviewopinion = #{reviewopinion,jdbcType=LONGVARCHAR}
-    where tid = #{tid,jdbcType=CHAR}
-      and subid = #{subid,jdbcType=BIGINT}
+  <update id="updateReviewOpinion" parameterType="java.util.List" >
+    UPDATE tb_reviewsubject
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="reviewopinion =case" suffix="end,">
+        <foreach collection="reviewSubjects" item="i" index="index">
+          <if test="i.reviewopinion!=null">
+            when tid=#{i.tid} and subid=#{i.subid} then #{i.reviewopinion}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    WHERE
+    <foreach collection="reviewSubjects" separator="or" item="i" index="index" >
+      tid=#{i.tid} and subid=#{i.subid}
+    </foreach>
   </update>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="map" >
     select tid, subid, reviewopinion
@@ -34,8 +44,9 @@
     where tid = #{tid,jdbcType=CHAR}
       and subid = #{subid,jdbcType=BIGINT}
   </select>
-  <select id="selectAll" resultMap="BaseResultMap" >
+  <select id="selectByTid" resultMap="BaseResultMap" >
     select tid, subid, reviewopinion
     from tb_reviewsubject
+    where tid = #{tid}
   </select>
 </mapper>

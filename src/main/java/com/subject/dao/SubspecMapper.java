@@ -39,6 +39,8 @@ public interface SubspecMapper {
 
     Subspec selectByPrimaryKey(Long subspecid);
 
+    String selectSpecid(Long subid);
+
     List<Subspec> selectAll();
 
     /**

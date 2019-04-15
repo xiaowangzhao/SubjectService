@@ -60,6 +60,12 @@
     from tb_subspec
   </select>
 
+  <select id="selectSpecid" resultType="String" >
+    select specid
+    from tb_subspec
+    where subid = #{subid}
+  </select>
+
   <!--批量审核课题-->
   <update id="submitAuditBatchPass" parameterType="java.util.List">
     <foreach collection="list" item="item" index="index" open="" close="" separator=";">

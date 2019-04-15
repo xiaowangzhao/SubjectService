@@ -1,6 +1,6 @@
 package com.subject.dao;
 
-import com.subject.model.Reviewsubject;
+import com.subject.model.ReviewSubject;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -18,11 +18,11 @@ public interface ReviewsubjectMapper {
 
     int deleteByPrimaryKey(@Param("tid") String tid, @Param("subid") Long subid);
 
-    int insert(Reviewsubject record);
+    int insert(ReviewSubject record);
 
-    Reviewsubject selectByPrimaryKey(@Param("tid") String tid, @Param("subid") Long subid);
+    ReviewSubject selectByPrimaryKey(@Param("tid") String tid, @Param("subid") Long subid);
 
-    List<Reviewsubject> selectAll();
+    List<ReviewSubject> selectByTid(String tid);
 
-    int updateByPrimaryKey(Reviewsubject record);
+    int updateReviewOpinion(@Param("reviewSubjects") List<ReviewSubject> reviewSubjects);
 }

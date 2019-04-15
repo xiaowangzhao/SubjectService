@@ -14,8 +14,8 @@
     "subprog": "ads"
   },
   "progress":[
-    {"proid":"22","checkopinion":"11","content":"22","inorder": "0"},
-    {"proid":"23","checkopinion":"12","content":"2223","inorder": "2"}
+    {"startendtime":"22","content":"22","inorder": "0"},
+    {"startendtime":"23","content":"2223","inorder": "2"}
   ],
   "specid":"003"
 }
@@ -38,5 +38,12 @@
   "subspecs": [
     {"subid": 14, "specid": "100","auditoption": "审核不通过"},
     {"subid": 16, "specid": "100","auditoption": "审核不通过"}
+  ]
+}
+
+{
+  "stusubs": [
+    {"stuid": 12, "subid": "110", "pickorder":1},
+    {"stuid": 13, "subid": "110", "pickorder":2}
   ]
 }

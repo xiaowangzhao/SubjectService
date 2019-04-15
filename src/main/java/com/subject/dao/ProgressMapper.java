@@ -46,6 +46,13 @@ public interface ProgressMapper {
     List<Progress> selectAll();
 
     /**
+     * 获取progress列表
+     * @param subid
+     * @return
+     */
+    List<Progress> selectProgressList(long subid);
+
+    /**
      *修改进度
      * @param progress
      * @return

@@ -1,14 +1,13 @@
 package com.subject.service;
 
 import com.subject.dto.Result;
-import com.subject.model.Progress;
-import com.subject.model.SubNumByTea;
-import com.subject.model.Subject;
-import com.subject.model.Subspec;
+import com.subject.model.*;
 import org.apache.ibatis.annotations.Param;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author liangqin
@@ -17,12 +16,19 @@ import java.util.List;
 public interface SubjectService {
 
     /**
-     * 根据 subid 获得 subject 信息
+     * 根据 subid 获得 subject
+     * @param subid
+     * @return
+     */
+    Subject selectBySubid(Long subid);
+
+    /**
+     * 根据 subid 获得 subject ,progresslist，speid
      *
      * @param subid
      * @return
      */
-    Subject getSubject(Long subid);
+    Map<String, Object> getSubject(Long subid);
 
     /**
      * 根据教师信息得到课题列表
@@ -31,6 +37,8 @@ public interface SubjectService {
      * @return
      */
     List<Subject> getSubjects(String tid);
+
+
 
     /**
      * 获取课题列表
@@ -43,6 +51,13 @@ public interface SubjectService {
      * @param subid
      * @return
      */
+    int delSubjectBySubid(Long subid);
+
+    /**
+     * 删除课题,进程，所属专业
+     * @param subid
+     * @return
+     */
     int delSubject(Long subid);
 
     /**
@@ -52,6 +67,14 @@ public interface SubjectService {
      * @return
      */
     int submitSubject(long subid);
+
+    /**
+     * 提交课题到临时表
+     *
+     * @param subject
+     * @return
+     */
+    int submitSubjectTemp(Subject subject);
 
     /**
      * 修改课题
@@ -84,6 +107,20 @@ public interface SubjectService {
     int auditBarchSub(List<Subspec> subspecs);
 
     /**
+     * 通过tid， 获取教师所需要盲审的课题
+     * @param tid
+     * @return
+     */
+    Map<String, Object> getTeaReviewSub(String tid);
+
+    /**
+     * 更新教师盲审意见
+     * @param reviewSubjects
+     * @return
+     */
+    int updateReviewOpinion(List<ReviewSubject> reviewSubjects);
+
+    /**
      * 恢复课题状态到“审核未通过”
      * @param subid
      * @return
@@ -96,4 +133,30 @@ public interface SubjectService {
      * @return
      */
     SubNumByTea getsubnum(String tid, String tname);
+
+    /**
+     * 按专业查看所有课题情况,其中参数specid不能为null或”“
+     * @param specid
+     * @return
+     */
+    List<Subject> selectSubsBySpec(String specid) throws IOException;
+
+    /**
+     * 判断课题相似性
+     * @param subname
+     * @param threshold
+     * @return
+     */
+    List<SubSim> computesimilar(String subname, float threshold);
+
+    /**
+     *  保存前校验
+     * @param subject
+     */
+    String validNewSubject(Subject subject);
+
+    /**
+     * 判断课题的个数
+     */
+    int selectSubjectCount(String tid);
 }

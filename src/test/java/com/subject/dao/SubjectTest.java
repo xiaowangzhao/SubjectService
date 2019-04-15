@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.subject.BaseTest;
 import com.subject.model.Progress;
+import com.subject.model.ReviewSubject;
+import com.subject.model.SubNumByTea;
 import com.subject.model.Subject;
 import com.subject.util.JsonUtil;
 import org.apache.commons.io.FileUtils;
@@ -57,6 +59,32 @@ public class SubjectTest  {
         progress.setInorder(2);
         progress.setContent("sfd");
         int count = subjectMapper.insertSubject(subject);
+        System.out.println(subject.getSubid());
+    }
+
+    @Test
+    public void testInsertSubjectTmep() {
+        Subject subject = new Subject();
+        subject.setSubid(12L);
+        subject.setAsstid("003");
+        subject.setContent("dsf");
+        subject.setIsoutschool(23);
+        subject.setRequirement("sdf");
+        subject.setRefpapers("sdf");
+        subject.setRequirement("sdf");
+        subject.setStatus("0");
+        subject.setSubkind("bbb");
+        subject.setSubdirection("saf");
+        subject.setSubsource("adf");
+        subject.setSubsort("a");
+        subject.setSubtype("s");
+        subject.setSummary("asfd");
+        subject.setTid("002");
+        subject.setUsedyear("2016");
+        Progress progress = new Progress();
+        progress.setInorder(2);
+        progress.setContent("sfd");
+        int count = subjectMapper.insertSubjectTmep(subject);
         System.out.println(subject.getSubid());
     }
 
@@ -123,5 +151,44 @@ public class SubjectTest  {
             String tname = jsonOb.getString("tname");
             System.out.println(tname);
         }
+    }
+
+
+    @Test
+    public void testGetSubsBySpec(){
+        List<Subject> subjectList = subjectMapper.selectSubsBySpec("003");
+        for(Subject subject : subjectList) {
+            System.out.println(subject);
+        }
+    }
+
+    @Test
+    public void testGetSubsBySpecAndName(){
+        List<ReviewSubject> reviewSubjectList = subjectMapper.selectSubsBySpecAndName("100", "aaaaa");
+        for(ReviewSubject subject : reviewSubjectList) {
+            System.out.println(subject);
+        }
+    }
+
+    @Test
+    public void testGetSubjectRepeat(){
+        List<Subject> subjectList = subjectMapper.selectSubjectRepeat("003", "1111");
+        for(Subject subject : subjectList) {
+            System.out.println(subject);
+        }
+    }
+
+    @Test
+    public void testSelectSubjectSim(){
+        List<Subject> subjectList = subjectMapper.selectSubjectSim();
+        for(Subject subject : subjectList) {
+            System.out.println(subject);
+        }
+    }
+
+    @Test
+    public void testSelectSubjectCount(){
+        int count  = subjectMapper.selectSubjectCount("002");
+            System.out.println(count);
     }
 }
