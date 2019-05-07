@@ -35,9 +35,16 @@ public interface SubspecMapper {
      * @param specid
      * @return
      */
-    Long findProgress(@Param("subid") long subid, @Param("specid") String specid);
+    Subspec selectSpec(@Param("subid") long subid, @Param("specid") String specid);
 
-    Subspec selectByPrimaryKey(Long subspecid);
+    /**
+     * 查询课题对应的专业号列表
+     * @param subid
+     * @return
+     */
+    List<Subspec> selectSpecidsBySubid(Long subid);
+
+    Subspec selectBySubid(Long subid);
 
     String selectSpecid(Long subid);
 

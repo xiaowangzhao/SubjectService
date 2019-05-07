@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.subject.BaseTest;
-import com.subject.model.Progress;
-import com.subject.model.ReviewSubject;
-import com.subject.model.SubNumByTea;
-import com.subject.model.Subject;
+import com.subject.model.*;
 import com.subject.util.JsonUtil;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
@@ -19,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -156,7 +154,7 @@ public class SubjectTest  {
 
     @Test
     public void testGetSubsBySpec(){
-        List<Subject> subjectList = subjectMapper.selectSubsBySpec("003");
+        List<Subject> subjectList = subjectMapper.selectSubsBySpec("002");
         for(Subject subject : subjectList) {
             System.out.println(subject);
         }
@@ -190,5 +188,32 @@ public class SubjectTest  {
     public void testSelectSubjectCount(){
         int count  = subjectMapper.selectSubjectCount("002");
             System.out.println(count);
+    }
+
+    @Test
+    public void testgetReviewBySubid(){
+        String count  = subjectMapper.selectReviewBySubid(16L);
+        System.out.println(count);
+    }
+
+    @Test
+    public void testSelectPastSubject(){
+        List<SubSim> subSims  = subjectMapper.selectPastSubject("0002", "2015");
+        for(SubSim subSim : subSims) {
+            System.out.println(subSim);
+        }
+    }
+
+    @Test
+    public void testSelectNotSelectCountSubject(){
+        int count  = subjectMapper.selectNotSelectCountSubject(15L);
+        System.out.println(count);
+    }
+
+    @Test
+    public void test111() {
+        RestTemplate rest = new RestTemplate();
+        String students = rest.getForObject("http://localhost:8084/students", String.class);
+        System.out.println(students);
     }
 }

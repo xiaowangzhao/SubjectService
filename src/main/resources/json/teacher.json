@@ -3,15 +3,15 @@
     {
       "tid": "002",
       "tname": "王老师",
-      "tdept": 3,
-      "tpost": 1,
+      "tdept": "软件工程教研室",
+      "tpost": "教授",
       "tdegree": 2
     },
     {
       "tid": "003",
       "tname": "李老师",
-      "tdept": 3,
-      "tpost": 1,
+      "tdept": "软件工程教研室",
+      "tpost": "教授",
       "tdegree": 2
     }
   ]

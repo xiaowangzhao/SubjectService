@@ -92,4 +92,19 @@ public class Subspec {
     public void setRemark(String remark) {
         this.remark = remark;
     }
+
+    @Override
+    public String toString() {
+        return "Subspec{" +
+                "subspecid=" + subspecid +
+                ", subid=" + subid +
+                ", specid='" + specid + '\'' +
+                ", auditoption='" + auditoption + '\'' +
+                ", auditflag='" + auditflag + '\'' +
+                ", releaseflag='" + releaseflag + '\'' +
+                ", operator='" + operator + '\'' +
+                ", operatedtime=" + operatedtime +
+                ", remark='" + remark + '\'' +
+                '}';
+    }
 }

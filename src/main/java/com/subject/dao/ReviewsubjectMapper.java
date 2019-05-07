@@ -16,6 +16,13 @@ public interface ReviewsubjectMapper {
      */
     int deleteAll();
 
+    /**
+     * 查找每个课题的审核意见（盲审）
+     * @param subid
+     * @return
+     */
+    String selectReviewBySubid(Long subid);
+
     int deleteByPrimaryKey(@Param("tid") String tid, @Param("subid") Long subid);
 
     int insert(ReviewSubject record);

@@ -31,6 +31,12 @@ public interface StusubMapper {
     int succPickStu(@Param("stuid") String stuid, @Param("subid") long subid);
 
     /**
+     * 学生落选，将pickflag设为0
+     * @param subid
+     * @return
+     */
+    int defeatStu(long subid);
+    /**
      * 教师弃选学生，将pickflag设为0
      * @param
      * @return
@@ -38,11 +44,25 @@ public interface StusubMapper {
     int failPickStu(@Param("stuid") String stuid, @Param("subid") long subid);
 
     /**
-     *
+     *查看学生是否重复选题
+     * @param stuid
+     * @return
+     */
+    Stusub selectStusub(long stuid);
+
+    /**
+     * 查询pickflag是否为1
      * @param subid
      * @return
      */
-    Stusub selectStusub(long subid);
+    Stusub selectPickflag(long subid);
+
+    /**
+     * 检查学生选题状态
+     * @param stuid
+     * @return
+     */
+    List<Stusub> selectStuStatus(String stuid);
 
     List<Stusub> selectAll();
 

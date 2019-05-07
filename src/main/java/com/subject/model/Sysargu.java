@@ -72,4 +72,17 @@ public class Sysargu {
     public void setOperatedtime(Date operatedtime) {
         this.operatedtime = operatedtime;
     }
+
+    @Override
+    public String toString() {
+        return "Sysargu{" +
+                "arguid=" + arguid +
+                ", arguname='" + arguname + '\'' +
+                ", argutype='" + argutype + '\'' +
+                ", arguvalue='" + arguvalue + '\'' +
+                ", remark='" + remark + '\'' +
+                ", operator='" + operator + '\'' +
+                ", operatedtime=" + operatedtime +
+                '}';
+    }
 }

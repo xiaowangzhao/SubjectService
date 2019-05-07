@@ -20,6 +20,12 @@
     <result column="refpapers" property="refpapers" jdbcType="LONGVARCHAR" />
     <result column="subprog" property="subprog" jdbcType="LONGVARCHAR" />
   </resultMap>
+
+  <resultMap id="pastSubjectMap" type="com.subject.model.SubSim">
+    <result column="usedyear" property="usedyear"/>
+    <result column="subname" property="subname"/>
+  </resultMap>
+
   <delete id="delSubject" parameterType="java.lang.Long" >
     delete from tb_subject
     where subid = #{subid,jdbcType=BIGINT}
@@ -181,5 +187,30 @@
         SELECT count(*)
         FROM tb_subject
         WHERE tid=#{tid}
+   </select>
+
+  <!--查找每个课题的审核意见（盲审）-->
+  <select id="selectReviewBySubid" parameterType="Long" resultType="String">
+        SELECT NULLIF(reviewopinion,'')
+        FROM tb_reviewsubject
+        WHERE subid=#{subid}
+   </select>
+
+  <!--查询教师往年课题-->
+  <select id="selectPastSubject" parameterType="String" resultMap="pastSubjectMap">
+        SELECT usedyear,subname
+        FROM tb_subhistory
+        WHERE tid=#{tid} AND usedyear > #{longyear}
+    </select>
+
+  <!--课题没有被选中，查看是否已有学生初选-->
+  <select id="selectNotSelectCountSubject" resultType="Integer">
+        SELECT count(stuid)
+        FROM tb_stusub
+        WHERE subid=#{subid}
+        AND ifnull(pickflag,'')=''  AND pickorder=(
+        SELECT MIN(pickorder)
+        FROM tb_stusub
+        WHERE ifnull(pickflag,'')='')
     </select>
 </mapper>

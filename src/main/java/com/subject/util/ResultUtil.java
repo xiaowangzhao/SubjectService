@@ -1,5 +1,6 @@
 package com.subject.util;
 
+import com.subject.Exception.ExceptionEnum;
 import com.subject.dto.Result;
 
 /**
@@ -25,6 +26,19 @@ public class ResultUtil {
         Result result = new Result();
         result.setStatus(code);
         result.setErrorMsg(msg);
+        return result;
+    }
+
+    /**
+     * 返回异常信息，在已知的范围内
+     * @param exceptionEnum
+     * @return
+     */
+    public static Result error(ExceptionEnum exceptionEnum) {
+        Result result = new Result();
+        result.setStatus(exceptionEnum.getCode());
+        result.setErrorMsg(exceptionEnum.getMsg());
+        result.setData(null);
         return result;
     }
 }

@@ -9,9 +9,11 @@ import com.subject.model.Subspec;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author liangqin
@@ -106,13 +108,13 @@ public class SubjectServiceTest extends BaseTest {
     @Test
     public void testAuditBarchSub() {
         Subspec subspec = new Subspec();
-        subspec.setSubid(14l);
-        subspec.setSpecid("100");
-        subspec.setAuditoption("1");
+        subspec.setSubid(27l);
+        subspec.setSpecid("002");
+        subspec.setReleaseflag("1");
         Subspec subspec1 = new Subspec();
-        subspec1.setSubid(17l);
-        subspec1.setSpecid("100");
-        subspec1.setAuditoption("1");
+        subspec1.setSubid(31l);
+        subspec1.setSpecid("002");
+        subspec1.setReleaseflag("1");
         List<Subspec> subspecList = new ArrayList<>();
         subspecList.add(subspec);
         subspecList.add(subspec1);
@@ -163,5 +165,34 @@ public class SubjectServiceTest extends BaseTest {
         progressList.add(progress1);
         String count = subjectService.validNewSubject(subject);
         System.out.println(count);
+    }
+
+    @Test
+    public void testGetSubsBySpec() throws Exception {
+        List<Subject> subjects = subjectService.getSubsBySpec("002", null, null, null);
+        for(Subject subject : subjects) {
+            System.out.println(subject);
+        }
+    }
+
+    @Test
+    public void testGetStusBySpec() throws Exception {
+        List test =  subjectService.getStusBySpec("003", null, null);
+        System.out.println(test);
+    }
+
+    @Test
+    public void tests() throws IOException {
+        Map<String, Object> map = subjectService.getSpecInformation(54L);
+        System.out.println(map);
+
+    }
+
+    @Test
+    public void getAllinfo() throws IOException {
+        List<Subject> subjects = subjectService.getAllinfo("001");
+        for(Subject subject : subjects) {
+            System.out.println(subject);
+        }
     }
 }

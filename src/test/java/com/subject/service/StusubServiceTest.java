@@ -29,4 +29,15 @@ public class StusubServiceTest  extends BaseTest {
         String result = stusubService.insertBatchStuSub(stusubList);
         System.out.println(result);
     }
+
+    @Test
+    public void testTeaPickStu() {
+        stusubService.teaPickStu("2024", 17L, 1);
+    }
+
+    @Test
+    public void testGetStuStatus() {
+        String status = stusubService.getStuStatus("20214");
+        System.out.println(status);
+    }
 }

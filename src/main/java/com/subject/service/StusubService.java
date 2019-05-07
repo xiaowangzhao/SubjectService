@@ -25,4 +25,11 @@ public interface StusubService {
      * @param status status为1时，选中学生，status为0时，弃选学生
      */
     void teaPickStu(String stuid, long subid, int status);
+
+    /**
+     * 检查学生选题状态
+     * @param stuid
+     * @return
+     */
+    String getStuStatus(String stuid);
 }

@@ -12,7 +12,7 @@
   </resultMap>
   <delete id="deleteStusub" parameterType="java.lang.String" >
     delete from tb_stusub
-    where stuid = #{stuid} and pickflag is null or pickflag = '0';
+    where stuid = #{stuid} and pickflag is null or pickflag = '';
   </delete>
   <insert id="insertStuSub" parameterType="com.subject.model.Stusub" >
     insert into tb_stusub (stusubid, stuid, subid, 
@@ -35,7 +35,7 @@
   <select id="selectStusub" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select stusubid, stuid, subid, pickorder, pickflag
     from tb_stusub
-    where subid = #{subid,jdbcType=BIGINT}
+    where stuid = #{stuid,jdbcType=VARCHAR}
   </select>
   <select id="selectAll" resultMap="BaseResultMap" >
     select stusubid, stuid, subid, pickorder, pickflag, operator, operatedtime
@@ -55,14 +55,29 @@
     </foreach>
   </insert>
 
-  <update id="updatePickflag">
+  <update id="succPickStu">
         UPDATE tb_stusub
         SET pickflag = '1'
         WHERE subid = #{subid} and stuid = #{stuid}
   </update>
+
+  <update id="defeatStu">
+        UPDATE tb_stusub
+        SET pickflag = '0'
+        WHERE subid = #{subid} and pickflag is null or pickflag = ''
+  </update>
+
   <update id="failPickStu">
         UPDATE tb_stusub
         SET pickflag = '0'
         WHERE subid = #{subid} and stuid = #{stuid}
   </update>
+
+  <select id="selectPickflag" parameterType="long" resultMap="BaseResultMap">
+        SELECT * FROM tb_stusub WHERE pickflag='1' and subid=#{subid}
+    </select>
+
+  <select id="selectStuStatus" parameterType="String" resultMap="BaseResultMap">
+        SELECT * FROM tb_stusub WHERE stuid=#{stuid}
+    </select>
 </mapper>

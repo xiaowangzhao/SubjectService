@@ -2,11 +2,9 @@ package com.subject.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.subject.dao.ProgressMapper;
-import com.subject.dao.ReviewsubjectMapper;
-import com.subject.dao.SubjectMapper;
-import com.subject.dao.SubspecMapper;
+import com.subject.dao.*;
 import com.subject.model.*;
+import com.subject.service.StusubService;
 import com.subject.service.SubjectService;
 import com.subject.service.SysarguService;
 import com.subject.util.JsonUtil;
@@ -42,6 +40,15 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Autowired
     private ReviewsubjectMapper reviewsubjectMapper;
+
+    @Autowired
+    private StusubMapper stusubMapper;
+
+    @Autowired
+    private SyscodeMapper syscodeMapper;
+
+    @Autowired
+    private StusubService stusubService;
 
     /**
      * 根据 subid 获得 subject 信息
@@ -82,10 +89,184 @@ public class SubjectServiceImpl implements SubjectService {
      * @return
      */
     @Override
-    public List<Subject> getSubjects(String tid) {
-        return subjectMapper.getSubjects(tid);
+    public Map<String, Object> getSubjects(String tid) {
+        Map<String, Object> map = new HashMap<>();
+        List<Subspec> subspecs = new ArrayList<>();
+        Subspec subspec = null;
+        try{
+            List<Subject> subjects = subjectMapper.getSubjects(tid);
+            for(Subject subject : subjects) {
+                subspec = subspecMapper.selectBySubid(subject.getSubid());
+                subspecs.add(subspec);
+            }
+            map.put("subjects", subjects);
+            map.put("subspecs", subspecs);
+        }catch (Exception e) {
+            map.put("errorMsg", "获取课题信息错误！");
+            return map;
+        }
+        return map;
     }
 
+    /**
+     * 通过tsubid获取spec列表里的专业信息
+     * @param subid
+     * @return
+     * @throws IOException
+     */
+    @Override
+    public Map<String, Object> getSpecInformation(Long subid) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        JSONArray jsonArray = JsonUtil.getSpec();
+        List<Subspec> subspecs = subspecMapper.selectSpecidsBySubid(subid);
+        String specName = "";
+        String specid = "";
+        for(Subspec subspec : subspecs) {
+            specid = subspec.getSpecid();
+            for(Object obj : jsonArray) {
+                JSONObject jsonOb = (JSONObject) obj;
+                String specidTemp = jsonOb.getString("specid");
+                if(specidTemp.equals(specid)){
+                    String specname = jsonOb.getString("specname");
+                    specName += specname + " ";
+                    map.put("specname", specname);
+                    map.put("specName", specName);
+
+                }
+            }
+        }
+
+        return  map;
+    }
+
+
+    /**
+     * 获取教师对应每个课题的状态及可进行的操作情况
+     * @param tid
+     * @return
+     */
+    @Override
+    public List<Subject> getAllinfo(String tid) {
+
+        List<Subject> subjects = new ArrayList<>();
+        try{
+            List<Subject> subjectList = subjectMapper.getSubjects(tid);
+            for(Subject subject : subjectList) {
+                Subject tempSub = subject;
+                Long subid = subject.getSubid();
+                String submitflag = subject.getStatus();
+
+                //获取课题审核意见
+                String reviewOpinion = reviewsubjectMapper.selectReviewBySubid(subid);
+
+                //计算相似的历史课题数
+                tempSub.setSimSubsInHis(this.computesimilarWithOldSubs(subject.getTid(), subject.getSubname(), 0.9F));
+
+                tempSub.setReviewopinion(reviewOpinion);
+
+                //获得课题对应专业
+                Map<String, Object> specInformationMap = this.getSpecInformation(subid);
+                String specName = (String) specInformationMap.get("specName");
+
+                if(submitflag == null || submitflag.equals("")) {
+                    tempSub.setCondition("未提交");
+                    tempSub.getOperations().add("修改");
+                    tempSub.getOperations().add("删除");
+                    tempSub.getOperations().add("提交");
+                    tempSub.getOperations().add("转移到暂存库");
+                }else if(submitflag.equals("1")) {  //已提交
+                    String condition = "";
+                    //判断是否被选中
+                    Stusub stusub = stusubMapper.selectPickflag(subid);
+                    if(stusub != null) {
+                        condition="已选,"+stusub.getStuid();
+                        tempSub.setCondition(condition);
+
+
+                        String modifyflag = sysarguService.selectSysargu("modifytaskbookflag").getArguvalue();
+                        //需增加判断，若允许修改，则显示‘修改任务书’按钮，否则不显示
+                        if(modifyflag.equals("1")) {
+                            tempSub.getOperations().add("修改任务书");
+                            tempSub.getOperations().add("复制到暂存库");
+                        }
+                        tempSub.getOperations().add("查看设计情况");
+                    }else {//课题没有被选中，查看是否已有学生初选
+                        int stucount = subjectMapper.selectNotSelectCountSubject(subid);
+                        if(stucount != 0) {
+                            condition = "初选学生数："+stucount;
+                            tempSub.setCondition(condition);
+                            tempSub.getOperations().add("选择学生");
+                        }else {//课题没有人选，判断是否已审核、已发布
+
+                            String status="";
+                            boolean showoptionflag=false;//是否显示“查看审核意见”操作
+                            List<Subspec> subspecs = subspecMapper.selectSpecidsBySubid(subid);
+                            for(Subspec subspec : subspecs) {
+
+                                String specname = (String) specInformationMap.get("specname");
+                                String auditflag = subspec.getAuditflag();
+                                String releaseflag = subspec.getReleaseflag();
+                                String reviewstr = "<hr>[盲审意见："+reviewOpinion+"]";
+
+
+                                if(auditflag==null||auditflag.equals("")) {//没有审核
+                                    if(reviewOpinion.equals("")) reviewstr="<hr>[等待盲审]";
+                                    if(status.equals("")) {
+                                        status="("+specname+")审核中…"+reviewstr;
+                                    }else{
+                                        status=status+"<br>"+"("+specname+")审核中…"+reviewstr;
+                                    }
+                                }else if(auditflag.equals("0")) {//审核没通过
+                                    if(status.equals("")) {
+                                        status="("+specname+")审核没通过"+reviewstr;
+                                    }else{
+                                        status=status+"<br>"+"("+specname+")审核没通过"+reviewstr;
+                                    }
+                                    showoptionflag=true;//操作中增加查看审核意见
+                                }else {
+                                    if(releaseflag==null||releaseflag.equals("")){//还未发布
+                                        if(status.equals("")) {
+                                            status="("+specname+")审核通过";
+                                        }else{
+                                            status=status+"<br>"+"("+specname+")审核通过";
+                                        }
+                                    }else {//课题已发布，但是还没有学生选
+                                        String endpickingflag = sysarguService.selectSysargu("endpickingflag").getArguvalue();
+                                        if(endpickingflag.equals("1")){
+                                            status="选题已结束";
+                                        }else{
+                                            if(status.equals("")) {
+                                                status="("+specname+")学生选题中…";
+                                            }else{
+                                                status=status+"<br>"+"("+specname+")学生选题中…";
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+
+
+                            tempSub.setCondition(status);
+                            if(showoptionflag) tempSub.getOperations().add("查看审核意见");
+                        }
+                    }
+
+                }else {//所有专业审核未通过时，submitflag="0",auditflag="0"
+                    tempSub.setCondition("审核没通过"+"<hr>[盲审意见："+reviewOpinion+"]");
+                    tempSub.getOperations().add("查看审核意见");
+                    tempSub.getOperations().add("修改");
+                    tempSub.getOperations().add("删除");
+                    tempSub.getOperations().add("提交");
+                    tempSub.getOperations().add("转移到暂存库");
+                }
+                subjects.add(tempSub);
+            }
+        }catch (Exception e) {
+            System.out.println("chucuola~");
+        }
+        return subjects;
+    }
 
 
     /**
@@ -174,6 +355,12 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
 
+    /**
+     *
+     * @param subject
+     * @param processList
+     * @param specid
+     */
     public void addProgressSubspec(Subject subject, List<Progress> processList, String specid) {
         progressMapper.addProgress(processList);
         Subspec subspec = new Subspec();
@@ -231,8 +418,16 @@ public class SubjectServiceImpl implements SubjectService {
         ArrayList<SubReview> subReviews = new ArrayList<>();
         Map<String,String> teaSumForReview=new HashMap<>();//参与盲审的教师数量
         try{
+            String subdirection = "";
             for(int i = 1; i <= 3; i++) {
-                List<Subject> subjectList = subjectMapper.selectSubByDirection(String.valueOf(i));
+                if(i == 1){
+                    subdirection = "软件";
+                }else if(i == 2) {
+                    subdirection = "网络";
+                }else {
+                    subdirection = "硬件";
+                }
+                List<Subject> subjectList = subjectMapper.selectSubByDirection(subdirection);
                 ArrayList<TeaSubSum> teaSubSums = new ArrayList<>(); //统计每个教师申报课题数目（符合课题方向i），记录每个老师盲审题目
                 List<TeaSubSum> teaSubSumTemp = new ArrayList<>(); //存储课题号，分配时用
                 String lastTid =null;
@@ -262,7 +457,7 @@ public class SubjectServiceImpl implements SubjectService {
                 }
                 //开始分配课题
                 int teasum=teaSubSums.size();
-                if(teasum == 1) return "只有一个教师申请了课题方向代码为"+String.valueOf(i)+"的课题，无法进行分配！";
+                if(teasum == 1) return "只有一个教师申请了课题方向为"+subdirection+"的课题，无法进行分配！";
                 TeaSubComparator comparator = new TeaSubComparator();
                 Collections.sort(teaSubSums, comparator);//先分审题目多的老师
                 for(int j = 0; j < teasum; j++) {  //对每个老师进行循环分配，取第一个教师
@@ -338,7 +533,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     /**
-     * 审核课题成功时传subid, specid,发布课题时传subid, specid, auditflag='1'
+     * 审核课题成功时传subid, specid, auditflag='1' 发布课题时传subid, specid, releaseflag='1'
      * 审核课题失败时传subid, specid, auditoption
      * @param subspecs
      * @return
@@ -349,17 +544,14 @@ public class SubjectServiceImpl implements SubjectService {
         if(subspecs.size() != 0) {
             Subspec subspec = subspecs.get(0);
             try {
-                if(subspec.getAuditflag() == null && subspec.getReleaseflag() == null && subspec.getAuditoption() == null) { //批量审核课题,审核通过
-                    subspecMapper.submitAuditBatchPass(subspecs);
-                    return 1;
+                if(subspec.getAuditflag() != null && subspec.getReleaseflag() == null && subspec.getAuditoption() == null) { //批量审核课题,审核通过
+                    return subspecMapper.submitAuditBatchPass(subspecs);
                 }
                 else if(subspec.getAuditflag() == null && subspec.getReleaseflag() == null && subspec.getAuditoption() != null) { //批量审核课题,审核未通过
-                    subspecMapper.submitAuditBatchUnPass(subspecs);
-                    return 1;
+                    return subspecMapper.submitAuditBatchUnPass(subspecs);
                 }
-                else if (subspec.getAuditflag().equals("1") && subspec.getReleaseflag() == null) { //批量发布课题
-                    subspecMapper.releasesubject(subspecs);
-                    return 1;
+                else if (subspec.getReleaseflag() != null && subspec.getAuditflag() == null && subspec.getAuditoption() == null) { //批量发布课题
+                    return subspecMapper.releasesubject(subspecs);
                 }
 
             }catch (Exception e) {
@@ -379,16 +571,26 @@ public class SubjectServiceImpl implements SubjectService {
         Map<String, Object> map = new HashMap<>();
         List<ReviewSubject> reviewSubjects;
         List<Subject> subjects = new ArrayList<>();
+        List<Subspec> subspecs = new ArrayList<>();
+        List<Progress> progresses = new ArrayList<>();
+        List progressMap = new ArrayList<>();
+        Subspec subspec = null;
         Subject subject = null;
         try{
             reviewSubjects = reviewsubjectMapper.selectByTid(tid);
             for(ReviewSubject reviewSubject : reviewSubjects) {
                 long subid = reviewSubject.getSubid();
+                subspec = subspecMapper.selectBySubid(subid);
                 subject = subjectMapper.getSubject(subid);
+                progresses = progressMapper.selectProgressList(subid);
+                subspecs.add(subspec);
                 subjects.add(subject);
+                progressMap.add(progresses);
             }
             map.put("reviewSubjects", reviewSubjects);
             map.put("subjects", subjects);
+            map.put("subspecs", subspecs);
+            map.put("progressMap", progressMap);
         }catch (Exception e) {
             System.out.println(e);
         }
@@ -442,10 +644,7 @@ public class SubjectServiceImpl implements SubjectService {
         return subNumByTea;
     }
 
-    @Override
-    public List<Subject> selectSubsBySpec(String specid) throws IOException {
-        return null;
-    }
+
 
     /**
      *  保存前校验
@@ -483,9 +682,292 @@ public class SubjectServiceImpl implements SubjectService {
         return "1";
     }
 
+    /**
+     * 查询课题数量
+     * @param tid
+     * @return
+     */
     @Override
     public int selectSubjectCount(String tid) {
         return subjectMapper.selectSubjectCount(tid);
+    }
+
+
+
+    /**
+     *按专业查看所有课题情况
+     * @param specid
+     * @param substatus
+     * @return
+     */
+    @Override
+    public List<Subject> getSubsBySpec(String specid, String tdept,String tname, String substatus) throws Exception{
+        Map<String, Object> map = new HashMap<>();
+        List<Subject> subjectList = new ArrayList<>();
+        JSONArray jsonArray = JsonUtil.getTeacher();
+        if(tdept==null)tdept="";
+        if(tname==null)tname="";
+        if(substatus==null)substatus="";
+        try{
+            if(specid == null || specid.equals("")) {
+               throw new Exception("按专业查询课题时，专业编号不能为空");
+            }
+            List<Subject> subjects = subjectMapper.selectSubsBySpec(specid);
+            if(subjects.size() != 0){
+                Subject temp;
+                for(Subject subject : subjects) {
+                    temp = subject;
+                    long subid = subject.getSubid();
+                    String reviewopinion = subjectMapper.selectReviewBySubid(subid);
+                    temp.setReviewopinion(reviewopinion);
+                    //查询课题历史，确定重复的课题
+                    temp.setSimSubsInHis(this.computesimilarWithOldSubs(temp.getTid(), temp.getSubname(), 0.9F));
+                    String tid = subject.getTid();
+                    String asstid = subject.getAsstid();
+                    temp.setTnames(this.getTname(tid, asstid));
+                    String tdeptTpost = this.getTeacherInformation(tid);
+                    String[] str = tdeptTpost.split(" ");
+                    if(str.length != 0) {
+                        temp.setTdept(str[0]);
+                        temp.setTpost(str[1]);
+                    }
+
+                    Subspec subspec = subspecMapper.selectSpec(subid, specid);
+                    String auditflag = subspec.getAuditflag();
+                    String releaseflag = subspec.getReleaseflag();
+                    String auditoption = subspec.getAuditoption();
+
+                    String status = temp.getStatus();
+                    if(status == null || status.equals("")){
+                        temp.setCondition("未提交");
+                    }else if(status.equals("1")){  //课题已提交
+                        //判断是否被选中
+                        Stusub stusub = stusubMapper.selectPickflag(subid);
+                        if(stusub != null) {
+                            temp.setCondition("已选/" + stusub.getStuid());
+                        }else{ //课题没有被选中，查看是否已有学生初选
+                            int stucount = subjectMapper.selectNotSelectCountSubject(subid);
+                            if(stucount != 0) {
+                                temp.setCondition("已初选/" + stucount);
+                            }else {//课题没有人选，判断是否已审核、已发布
+                                String reviewstr="[盲审意见："+reviewopinion+"]";
+                                if(auditflag==null||auditflag.equals("")){//没有审核
+                                    if(reviewopinion == null) {
+                                        reviewstr="[等待盲审]";
+                                    }
+                                    temp.setCondition("已提交-等待审核"+reviewstr);
+                                }else if(auditflag.equals("0")){//审核没通过
+                                    temp.setCondition("审核没通过/"+auditoption+"[盲审意见："+reviewopinion+"]");
+                                }else{
+                                    if(releaseflag==null||releaseflag.equals("")){//还未发布
+                                        temp.setCondition("审核通过-等待发布");
+                                    }else{//课题已发布，但是还没有学生选
+                                        temp.setCondition("已发布-等待选题");
+                                    }
+                                }
+                            }
+                        }
+                    }else {//所有专业审核未通过时，submitflag="0",auditflag="0"
+                        temp.setCondition("审核没通过/"+auditoption+"[盲审意见："+reviewopinion+"]");
+                    }
+                    subjectList.add(temp);
+                }
+            }
+
+
+        }catch (Exception e) {
+            System.out.println(e + " getSubsBySpec");
+        }
+        //根据参数substatus值从ret中筛选满足条件的
+        List<Subject> result = new ArrayList<Subject>();
+        if(substatus.equals("")){
+            result = subjectList;
+        }else {
+            String substatuscodename = syscodeMapper.selectCodeByContent("ktzht", substatus).getCodecontent();
+            for(Subject subject : subjectList) {
+                String str = subject.getCondition().split("/")[0];
+                if(str.length() >= 8 && str.substring(0, 8).equals("已提交-等待审核")) str = str.substring(0, 8);
+                if(str.equals(substatuscodename)){
+                    result.add(subject);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 与教师往年课题（近三年）进行相似度比较
+     *  返回相似度大于等于阈值的课题名
+     * @param tutorid
+     * @param subname
+     * @param threshold
+     * @return
+     */
+    @Override
+    public List<SubSim> computesimilarWithOldSubs(String tutorid, String subname, float threshold) {
+        List<SubSim> subSimList = new ArrayList<>();
+        if(subname==null) subname="";
+        if(tutorid==null) tutorid="";
+        //获得当前毕业设计年份
+        try {
+            String currentyear = sysarguService.selectSysargu("startdate").getArguvalue().substring(0,3);
+            String longyear=String.valueOf(Integer.valueOf(currentyear)-3);//参与比较的最久年份
+            List<SubSim> subSims = subjectMapper.selectPastSubject(tutorid, longyear);
+            if(subSims.size() != 0){
+                for(SubSim subSim : subSims){
+                    String subname0 = subSim.getSubname();
+                    Float simd = Similarity.calculatesimilar(subname0, subname);
+                    if(simd<threshold) continue;
+                    SubSim sim = new SubSim();
+                    sim.setSubname(subname0);
+                    sim.setSimilard(simd);
+                    sim.setUsedyear(subSim.getUsedyear());
+                    subSimList.add(sim);
+                }
+            }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+        return subSimList;
+    }
+
+    /**
+     * 通过tid获取教师列表里的信息
+     * @param tid
+     * @return
+     * @throws IOException
+     */
+    public String getTeacherInformation(String tid) throws IOException {
+        JSONArray jsonArray = JsonUtil.getTeacher();
+        String tdept = "";
+        String tpost = "";
+        for(Object obj : jsonArray) {
+            JSONObject jsonOb = (JSONObject) obj;
+            String tidtemp = jsonOb.getString("tid");
+            String tdepttemp = jsonOb.getString("tdept");
+            String tposttemp = jsonOb.getString("tpost");
+            if(tid.equals(tidtemp)){
+                tdept = tdepttemp;
+                tpost = tposttemp;
+            }
+        }
+        return  tdept + " " + tpost;
+    }
+
+    /**
+     * 在教师数据里获取教师名
+     * @param tid
+     * @param asstid
+     * @return
+     */
+    public String getTname(String tid, String asstid) throws IOException {
+        JSONArray jsonArray = JsonUtil.getTeacher();
+        String teaname = "";
+        for(Object obj : jsonArray) {
+            JSONObject jsonOb = (JSONObject) obj;
+            String tname = jsonOb.getString("tname");
+            String tidtemp = jsonOb.getString("tid");
+            if(tid.equals(tidtemp)){
+                teaname += tname;
+            }
+        }
+        teaname += "/";
+        for(Object obj : jsonArray) {
+            JSONObject jsonOb = (JSONObject) obj;
+            String tname = jsonOb.getString("tname");
+            String asstidtemp = jsonOb.getString("tid");
+            if(asstid.equals(asstidtemp)){
+                teaname += tname;
+            }
+        }
+
+        return teaname;
+    }
+
+    /**
+     * 课题审核查询
+     *按专业、课题名、学生名 查询论文审核信息
+     * @param specid
+     * @param subname
+     * @return
+     */
+    @Override
+    public List<ReviewSubject> getSubsBySpecAndName(String specid, String subname) throws IOException {
+        List<ReviewSubject> reviewSubjects = subjectMapper.selectSubsBySpecAndName(specid, subname);
+        JSONArray jsonArray = JsonUtil.getTeacher();
+
+        for(ReviewSubject reviewSubject : reviewSubjects) {
+            String tid2 = reviewSubject.getTid();
+            String asstid = reviewSubject.getAsstid();
+            String reviewid = reviewSubject.getReviewerid();
+            String teaname = this.getTname(tid2, asstid);
+            String subnametemp = subjectMapper.getSubject(reviewSubject.getSubid()).getSubname();
+            reviewSubject.setSubname(subnametemp);
+            for(Object obj : jsonArray) {
+                JSONObject jsonOb = (JSONObject) obj;
+                String tname = jsonOb.getString("tname");
+                String tid = jsonOb.getString("tid");
+                if(tid.equals(reviewid)){
+                    reviewSubject.setReviewername(tname);
+                }
+            }
+            reviewSubject.setTnames(teaname);
+        }
+
+        return reviewSubjects;
+    }
+
+    /**
+     * 按专业获得学生当前选题状态
+     * @param specid
+     * @param classname
+     * @param stustatus
+     * @return
+     */
+    @Override
+    public List getStusBySpec(String specid, String classname, String stustatus) throws IOException, Exception {
+        List studentlist = new ArrayList();
+        JSONArray jsonArray = JsonUtil.getStudents();
+        if(classname==null) classname="";
+        if(stustatus==null) stustatus="";
+        if(specid==null||specid.equals("")) {
+            throw new Exception("专业编号不能为空!");
+        }
+        for(Object obj : jsonArray) {
+            Map<String, Object> map = new HashMap<>();
+            JSONObject jsonOb = (JSONObject) obj;
+            String stuid = jsonOb.getString("stuid");
+            String sname = jsonOb.getString("sname");
+            String clazzname = jsonOb.getString("classname");
+            String email = jsonOb.getString("email");
+            String telphone = jsonOb.getString("email");
+            String ssex = jsonOb.getString("ssex");
+            map.put("stuid", stuid);
+            map.put("sname", sname);
+            map.put("clazzname", clazzname);
+            map.put("email", email);
+            map.put("telphone", telphone);
+            map.put("ssex", ssex);
+            String status = stusubService.getStuStatus(stuid);
+            map.put("status", status);
+            if(status.split("/")[0].equals("已选")){
+                Subject subject = subjectMapper.getSubject(Long.valueOf(status.split("/")[1]));
+                map.put("subject",subject);
+            }
+            studentlist.add(map);
+        }
+        return studentlist;
+    }
+
+    /**
+     * 查询申报了课题方向为value的课题
+     * @param subdirection
+     * @return
+     */
+    @Override
+    public List<Subject> getSubByDirection(String subdirection) {
+        return subjectMapper.selectSubByDirection(subdirection);
     }
 
     /**
@@ -518,30 +1000,5 @@ public class SubjectServiceImpl implements SubjectService {
         return ret;
     }
 
-    /**
-     * 按专业查询课题
-     * @param specid
-     * @param tdept
-     * @param tname
-     * @return
-     * @throws IOException
-     */
-    public List<Subject> selectSubsBySpec(String specid, String tdept, String tname) throws IOException {
-        List<Subject> subjectList = subjectMapper.selectSubsBySpec("specid");
-        JSONArray jsonArray = JsonUtil.getTeacher();
-        for(Subject subject : subjectList) {
-            String tid = subject.getTid();
-            for(Object obj : jsonArray) {
-                JSONObject jsonOb = (JSONObject) obj;
-                String teacherid = jsonOb.getString("tid");
-                if(tid.equals(teacherid)) {
-
-                }
-            }
-        }
-
-
-        return null;
-    }
 
 }

@@ -27,6 +27,7 @@ import java.util.Map;
  * @author liangqin
  * @date 2019/3/23 9:47
  */
+@CrossOrigin  //开放跨域权限
 @RestController
 @RequestMapping(value = "/subjectservice")
 public class SubjectController {
@@ -52,19 +53,18 @@ public class SubjectController {
      * @param subid
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/subjects/{id}",method = {RequestMethod.GET})
     public Result getSubject(@PathVariable("id") long subid) {
         return ResultUtil.success(subjectService.getSubject(subid));
     }
 
     /**
-     * 根据教师信息得到课题列表
+     * 根据教师tid得到课题列表
      *
      * @param tid
      * @return
      */
-    @CrossOrigin
+
     @RequestMapping(value = "/getsubbytea/{tid}", method = {RequestMethod.GET})
     public Result getSubjects(@PathVariable("tid") String tid) {
         return ResultUtil.success(subjectService.getSubjects(tid));
@@ -77,7 +77,6 @@ public class SubjectController {
      * @param subid
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/subjects/{id}", method = {RequestMethod.DELETE})
     public Result delSubject(@PathVariable("id") Long subid) {
         if(subjectService.delSubject(subid) == 1){
@@ -92,7 +91,6 @@ public class SubjectController {
      * @param subid
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/subjects/{id}", method = {RequestMethod.PUT})
     public Result submitSubject(@PathVariable("id") long subid){
         if(subjectService.getSubject(subid) != null) {
@@ -111,7 +109,6 @@ public class SubjectController {
      * @param subid
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/subjects/temp/{subid}", method = {RequestMethod.GET})
     public Result addSubjectTemp(@PathVariable("subid") long subid) {
         try{
@@ -129,7 +126,6 @@ public class SubjectController {
      * @param map
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/subjects", method = {RequestMethod.POST})
     public Result addSubject(@RequestBody Map<String, Object> map) {
         if(!map.isEmpty()) {
@@ -168,7 +164,6 @@ public class SubjectController {
      * @param tid
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/auditsubject/teacher/{tid}", method = {RequestMethod.GET})
     public Result getTeaReviewSub(@PathVariable("tid") String tid) {
         Map<String, Object> map = new HashMap<>();
@@ -189,7 +184,6 @@ public class SubjectController {
      * @param map
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/auditsubject/teacher", method = {RequestMethod.POST})
     public Result updateReviewOpinion(@RequestBody Map<String, Object> map) {
         JsonUtil jsonUtil = new JsonUtil();
@@ -206,7 +200,6 @@ public class SubjectController {
      * 盲审分配
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/assignsubject", method = {RequestMethod.GET})
     public Result assignSubject() {
         try {
@@ -223,14 +216,15 @@ public class SubjectController {
      * @param map
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/auditsubject", method = {RequestMethod.POST})
     public Result assignSubject(@RequestBody Map<String, Object> map) {
         if(map.size() != 0) {
             JsonUtil jsonUtil = new JsonUtil();
             List<Subspec> subspecList = jsonUtil.mapToList(map, Subspec.class, "subspecs");
             try {
-                subjectService.auditBarchSub(subspecList);
+                if(subjectService.auditBarchSub(subspecList) == 0){
+                    return ResultUtil.error(403, "操作失败！");
+                }
                 return ResultUtil.success("操作成功！");
             }catch (Exception e) {
                 return ResultUtil.error(403, "操作失败！");
@@ -244,7 +238,6 @@ public class SubjectController {
      * @param
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/auditsubject/{id}", method = {RequestMethod.GET})
     public Result assignSubject(@PathVariable("id") long subid) {
         try {
@@ -261,7 +254,6 @@ public class SubjectController {
      * @param
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/getallsubnum", method = {RequestMethod.GET})
     public Result getAllsubnum() throws IOException {
         JSONArray jsonArray = JsonUtil.getTeacher();
@@ -285,7 +277,6 @@ public class SubjectController {
      * 获取参数列表
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/getallcode", method = {RequestMethod.GET})
     public Result getAllcode() {
         List codelist = new ArrayList();
@@ -311,7 +302,6 @@ public class SubjectController {
      * @param tid
      * @return
      */
-    @CrossOrigin
     @RequestMapping(value = "/getsubcount/{id}", method = {RequestMethod.GET})
     public Result getSubjectCount(@PathVariable("id") String tid) {
         int count = subjectService.selectSubjectCount(tid);
@@ -323,9 +313,8 @@ public class SubjectController {
      * @param
      * @return
      */
-    @CrossOrigin
-    @RequestMapping(value = "/selectedtopic", method = {RequestMethod.POST})
-    public Result getSubjectCount(@RequestBody Map<String, Object> map) {
+    @RequestMapping(value = "/select/stu", method = {RequestMethod.POST})
+    public Result StuSelectSub(@RequestBody Map<String, Object> map) {
         String result = null;
         try{
             JsonUtil jsonUtil = new JsonUtil();
@@ -339,4 +328,65 @@ public class SubjectController {
         }
         return ResultUtil.error(403, result);
     }
+
+    /**
+     * 教师选学生
+     * @param stuid 学号
+     * @param subid  课题号
+     * @param status 状态码 ：status为1时，选中学生，status为0时，弃选学生
+     * @return
+     */
+    @RequestMapping(value = "/select/tea", method = {RequestMethod.GET})
+    public Result TeaSelectStu(@RequestParam(value = "stuid", required =true)String stuid,
+                               @RequestParam(value = "subid", required =true)long subid,
+                               @RequestParam(value = "status", required =true)int status) {
+        try{
+            stusubService.teaPickStu(stuid, subid, status);
+        }catch (Exception e) {
+            return ResultUtil.error(403, "操作失败！");
+        }
+        return  ResultUtil.success("操作成功！");
+    }
+
+    /**
+     * 通过specid获得课题列表
+     * @param specid
+     * @param tname
+     * @param tdept
+     * @param substatus
+     * @return
+     */
+    @RequestMapping(value = "/getsubsbyspec", method = {RequestMethod.GET})
+    public Result getSubsBySpec(@RequestParam(value = "specid", required =true) String specid, @RequestParam(value = "tname", required =false) String tname,
+                                @RequestParam(value = "tdept", required =false) String tdept, @RequestParam(value = "substatus", required =false) String substatus) {
+        List<Subject> subjects;
+        try{
+            subjects = subjectService.getSubsBySpec(specid, tdept, tname, substatus);
+        } catch (Exception e) {
+            return ResultUtil.error(403, "error: " + e);
+        }
+
+        return ResultUtil.success(subjects);
+    }
+
+    /**
+     * 课题审核查询
+     * 按专业、课题名、学生名 查询论文审核信息
+     * @param specid
+     * @param subname
+     * @return
+     */
+    @RequestMapping(value = "/getsubsbyspecandname", method = {RequestMethod.GET})
+    public Result getSubsBySpecAndName(@RequestParam(value = "specid", required =true) String specid,
+                                       @RequestParam(value = "subname", required =false) String subname) {
+        List<ReviewSubject> reviewSubjects;
+        try{
+            reviewSubjects = subjectService.getSubsBySpecAndName(specid, subname);
+        }catch (Exception e) {
+            return ResultUtil.error(403, "查询失败！");
+        }
+
+        return ResultUtil.success(reviewSubjects);
+    }
+
 }

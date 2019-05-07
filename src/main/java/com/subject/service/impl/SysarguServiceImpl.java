@@ -1,6 +1,7 @@
 package com.subject.service.impl;
 
 import com.subject.dao.SysarguMapper;
+import com.subject.model.Sysargu;
 import com.subject.service.SysarguService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,5 +35,15 @@ public class SysarguServiceImpl implements SysarguService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 通过参数名查找参数值
+     * @param arguname
+     * @return
+     */
+    @Override
+    public Sysargu selectSysargu(String arguname) {
+        return sysarguMapper.selectSysargu(arguname);
     }
 }

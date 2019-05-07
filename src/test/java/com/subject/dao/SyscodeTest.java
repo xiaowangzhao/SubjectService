@@ -24,10 +24,9 @@ public class SyscodeTest  extends BaseTest {
 
     @Test
     public void testSelectCodeByCodeno() {
-        List<Syscode> syscodeList = syscodeMapper.selectCodeByCodeno("ktly");
-        for(Syscode syscode : syscodeList) {
-            System.out.println(syscode);
-        }
+        Syscode syscode = syscodeMapper.selectCodeByContent("ktzht", "未提交");
+        System.out.println(syscode);
+
 
     }
 }

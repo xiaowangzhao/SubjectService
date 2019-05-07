@@ -73,4 +73,22 @@ public class JsonUtil<T>{
         JSONArray jsonArray = jsonObject.getJSONArray("teacher");
         return  jsonArray;
     }
+
+    public static JSONArray getStudents() throws IOException {
+
+        File file = ResourceUtils.getFile("classpath:json/student.json");
+        String content = FileUtils.readFileToString(file);
+        JSONObject jsonObject = JSON.parseObject(content);
+        JSONArray jsonArray = jsonObject.getJSONArray("students");
+        return  jsonArray;
+    }
+
+    public static JSONArray getSpec() throws IOException {
+
+        File file = ResourceUtils.getFile("classpath:json/speciality.json");
+        String content = FileUtils.readFileToString(file);
+        JSONObject jsonObject = JSON.parseObject(content);
+        JSONArray jsonArray = jsonObject.getJSONArray("spec");
+        return  jsonArray;
+    }
 }

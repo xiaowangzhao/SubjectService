@@ -31,6 +31,12 @@ public class ReviewSubjectTest extends BaseTest {
     }
 
     @Test
+    public void getReviewBySubid() {
+
+        System.out.println(reviewsubjectMapper.selectReviewBySubid(54L));
+    }
+
+    @Test
     public void testEelectByTid() {
         List<ReviewSubject> reviewSubjectList = reviewsubjectMapper.selectByTid("002");
        for( ReviewSubject reviewsubject : reviewSubjectList) {

@@ -1,0 +1,18 @@
+{
+  "spec": [
+    {
+      "specid": "001",
+      "specname": "计算机科学与技术"
+    },
+    {
+      "specid": "002",
+      "specname": "网络工程"
+    },
+    {
+      "specid": "003",
+      "specname": "软件工程"
+    }
+  ]
+
+
+}

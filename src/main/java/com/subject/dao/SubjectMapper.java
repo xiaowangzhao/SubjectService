@@ -1,6 +1,7 @@
 package com.subject.dao;
 
 import com.subject.model.ReviewSubject;
+import com.subject.model.SubSim;
 import com.subject.model.Subject;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -136,4 +137,28 @@ public interface SubjectMapper {
      * 判断课题的个数
      */
     int selectSubjectCount(String tid);
+
+    /**
+     * 查找每个课题的审核意见（盲审）
+     * @param subid
+     * @return
+     */
+    String selectReviewBySubid(long subid);
+
+    /**
+     *查询教师往年课题
+     * @param tid
+     * @param longyear
+     * @return
+     */
+    List<SubSim> selectPastSubject(@Param("tid") String tid, @Param("longyear") String longyear);
+
+    /**
+     * 课题没有被选中，查看是否已有学生初选
+     * @param sbuid
+     * @return
+     */
+    int selectNotSelectCountSubject(long sbuid);
+
+
 }

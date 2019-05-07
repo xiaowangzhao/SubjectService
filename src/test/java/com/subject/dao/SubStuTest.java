@@ -54,8 +54,14 @@ public class SubStuTest  extends BaseTest {
     }
 
     @Test
+    public void testSuccPickStu() {
+        int stusub = stusubMapper.succPickStu("2020",28L);
+        System.out.println(stusub);
+    }
+
+    @Test
     public void testFailPickStu() {
-        int stusub = stusubMapper.failPickStu("111",28L);
+        int stusub = stusubMapper.failPickStu("2014",28L);
         System.out.println(stusub);
     }
 
@@ -64,4 +70,20 @@ public class SubStuTest  extends BaseTest {
         int stusub = stusubMapper.deleteStusub("111");
         System.out.println(stusub);
     }
+
+    @Test
+    public void testDefeatStu() {
+        int stusub = stusubMapper.deleteStusub("111");
+    }
+
+    @Test
+    public void testSelectStuStatus() {
+        List<Stusub> stusubs = stusubMapper.selectStuStatus("255");
+        for(Stusub stusub : stusubs) {
+            System.out.println(stusub);
+        }
+
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package com.subject.dao;
 
 import com.subject.BaseTest;
+import com.subject.model.Sysargu;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,6 +17,12 @@ public class SysarguTest extends BaseTest {
     @Test
     public void testSelectArguvalueByName() {
         String value = sysarguMapper.selectArguvalueByName("startdate");
+        System.out.println(value);
+    }
+
+    @Test
+    public void testSelectSysargu() {
+        Sysargu value = sysarguMapper.selectSysargu("startdate");
         System.out.println(value);
     }
 }

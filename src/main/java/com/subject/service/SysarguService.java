@@ -1,5 +1,7 @@
 package com.subject.service;
 
+import com.subject.model.Sysargu;
+
 import java.text.ParseException;
 
 /**
@@ -13,4 +15,11 @@ public interface SysarguService {
      * @return
      */
     boolean ifStartGraduate() throws ParseException;
+
+    /**
+     * 通过参数名查找参数值
+     * @param arguname
+     * @return
+     */
+    Sysargu selectSysargu(String arguname);
 }

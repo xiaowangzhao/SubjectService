@@ -41,15 +41,14 @@
     where subspecid = #{subspec.subspecid,jdbcType=BIGINT}
   </update>
 
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap"  >
-    select subspecid, subid, specid, auditoption, auditflag, releaseflag, operator, operatedtime,
-    remark
+  <select id="selectBySubid" resultMap="BaseResultMap"  >
+    select subid, specid
     from tb_subspec
-    where proid = #{proid,jdbcType=BIGINT}
+    where subid = #{subid,jdbcType=BIGINT}
   </select>
 
-  <select id="findProgress" resultType="Long"  >
-    select subspecid
+  <select id="selectSpec" resultMap="BaseResultMap"  >
+    select *
     from tb_subspec
     where subid = #{subid,jdbcType=BIGINT} and specid = #{specid,jdbcType=CHAR}
   </select>
@@ -58,6 +57,12 @@
     select subspecid, subid, specid, auditoption, auditflag, releaseflag, operator, operatedtime, 
     remark
     from tb_subspec
+  </select>
+
+  <select id="selectSpecidsBySubid" resultMap="BaseResultMap" >
+    select subid, specid, auditoption, auditflag, releaseflag
+    from tb_subspec
+    where subid = #{subid}
   </select>
 
   <select id="selectSpecid" resultType="String" >

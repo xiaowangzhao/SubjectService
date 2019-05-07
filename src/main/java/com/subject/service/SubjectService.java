@@ -36,7 +36,14 @@ public interface SubjectService {
      * @param tid
      * @return
      */
-    List<Subject> getSubjects(String tid);
+    Map<String, Object> getSubjects(String tid);
+
+    /**
+     * 获取教师对应每个课题的状态及可进行的操作情况
+     * @param tid
+     * @return
+     */
+    List<Subject> getAllinfo(String tid);
 
 
 
@@ -134,12 +141,7 @@ public interface SubjectService {
      */
     SubNumByTea getsubnum(String tid, String tname);
 
-    /**
-     * 按专业查看所有课题情况,其中参数specid不能为null或”“
-     * @param specid
-     * @return
-     */
-    List<Subject> selectSubsBySpec(String specid) throws IOException;
+
 
     /**
      * 判断课题相似性
@@ -159,4 +161,50 @@ public interface SubjectService {
      * 判断课题的个数
      */
     int selectSubjectCount(String tid);
+
+    /**
+     *按specid查看所有课题情况
+     * @param specid
+     * @param substatus
+     * @return
+     */
+    List<Subject> getSubsBySpec(String specid,  String tdept,String tname, String substatus) throws Exception;
+
+    /**
+     * 与教师往年课题（近三年）进行相似度比较
+     *  返回相似度大于等于阈值的课题名
+     * @param tutorid
+     * @param subname
+     * @param threshold
+     * @return
+     */
+    List<SubSim> computesimilarWithOldSubs(String tutorid, String subname, float threshold);
+
+    /**
+     * 课题审核查询
+     *按专业、课题名、学生名 查询论文审核信息
+     * @param specid
+     * @param subname
+     * @return
+     */
+    List<ReviewSubject> getSubsBySpecAndName( String specid, String subname) throws IOException;
+
+    /**
+     * 按专业获得学生当前选题状态
+     * @param specid
+     * @param classname
+     * @param stustatus
+     * @return
+     */
+    List getStusBySpec(String specid,String classname,String stustatus) throws IOException, Exception;
+
+
+    /**
+     * 查询申报了课题方向为value的课题
+     * @param subdirection
+     * @return
+     */
+    List<Subject> getSubByDirection(String subdirection);
+
+    Map<String, Object> getSpecInformation(Long subid) throws IOException;
 }

@@ -23,6 +23,13 @@ public interface SyscodeMapper {
     Syscode selectCode(@Param("codeno") String codeno, @Param("codevalue") String codevalue);
 
     /**
+     * 得到code
+     * @param codeno
+     * @param codecontent
+     * @return
+     */
+    Syscode selectCodeByContent(@Param("codeno") String codeno, @Param("codecontent") String codecontent);
+    /**
      * 通过codeno获得课题列表
      * @param codeno
      * @return

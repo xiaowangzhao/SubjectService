@@ -32,10 +32,10 @@
       operatedtime = #{operatedtime,jdbcType=TIMESTAMP}
     where arguid = #{arguid,jdbcType=BIGINT}
   </update>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select arguid, arguname, argutype, arguvalue, remark, operator, operatedtime
+  <select id="selectSysargu" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select arguid, arguname, argutype, arguvalue, remark
     from tb_sysargu
-    where arguid = #{arguid,jdbcType=BIGINT}
+    where arguname = #{arguname,jdbcType=BIGINT}
   </select>
   <select id="selectAll" resultMap="BaseResultMap" >
     select arguid, arguname, argutype, arguvalue, remark, operator, operatedtime

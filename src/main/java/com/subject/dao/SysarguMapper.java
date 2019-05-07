@@ -1,6 +1,8 @@
 package com.subject.dao;
 
 import com.subject.model.Sysargu;
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 public interface SysarguMapper {
@@ -8,7 +10,7 @@ public interface SysarguMapper {
 
     int insert(Sysargu record);
 
-    Sysargu selectByPrimaryKey(Long arguid);
+    Sysargu selectSysargu(String arguname);
 
     List<Sysargu> selectAll();
 
@@ -20,4 +22,7 @@ public interface SysarguMapper {
      * @return
      */
     String selectArguvalueByName(String arguname);
+
+    //按名字获得系统参数条目
+    Sysargu getSysargu(@Param("arguname") String arguname);
 }

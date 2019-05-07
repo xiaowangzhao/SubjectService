@@ -11,6 +11,26 @@ public class ReviewSubject {
 
     private String tnames;
 
+    private String reviewerid;
+
+    private String subname;
+
+    public String getSubname() {
+        return subname;
+    }
+
+    public void setSubname(String subname) {
+        this.subname = subname;
+    }
+
+    public String getReviewerid() {
+        return reviewerid;
+    }
+
+    public void setReviewerid(String reviewerid) {
+        this.reviewerid = reviewerid;
+    }
+
     public String getTnames() {
         return tnames;
     }

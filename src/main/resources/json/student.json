@@ -1,0 +1,104 @@
+{
+  "students": [
+    {
+      "stuid": "002",
+      "sname": "王老师",
+      "ssex": "nan",
+      "classname": "软件162",
+      "email": "2",
+      "telphone": "2",
+      "remark": "1",
+      "status": "",
+      "subject": {
+        "subid": 21,
+        "subname": "asdf",
+        "usedyear": "2016",
+        "subkind": "subkind",
+        "subsource": "subsource",
+        "subtype": "subtype",
+        "isoutschool": "1",
+        "tid": "1000",
+        "asstid": "1555",
+        "status": "0",
+        "subdirection": "sdds",
+        "subsort": "adsd",
+        "subprog": "ads"
+      }
+    },
+    {
+      "stuid": "003",
+      "sname": "王老师",
+      "ssex": "q",
+      "classname": "软件161",
+      "email": "a",
+      "telphone": "a",
+      "remark": "a",
+      "status": "",
+      "subject": {
+        "subid": 22,
+        "subname": "asdf",
+        "usedyear": "2016",
+        "subkind": "subkind",
+        "subsource": "subsource",
+        "subtype": "subtype",
+        "isoutschool": "1",
+        "tid": "1000",
+        "asstid": "1555",
+        "status": "0",
+        "subdirection": "sdds",
+        "subsort": "adsd",
+        "subprog": "ads"
+      }
+    },
+    {
+      "stuid": "004",
+      "sname": "王老师",
+      "ssex": "a",
+      "classname": "软件162",
+      "email": "a",
+      "telphone": "A",
+      "remark": "a",
+      "status": "",
+      "subject": {
+        "subid": 25,
+        "subname": "asdf",
+        "usedyear": "2016",
+        "subkind": "subkind",
+        "subsource": "subsource",
+        "subtype": "subtype",
+        "isoutschool": "1",
+        "tid": "1000",
+        "asstid": "1555",
+        "status": "0",
+        "subdirection": "sdds",
+        "subsort": "adsd",
+        "subprog": "ads"
+      }
+    },
+    {
+      "stuid": "005",
+      "sname": "王老师",
+      "ssex": "a",
+      "classname": "软件161",
+      "email": "A",
+      "telphone": "a",
+      "remark": "a",
+      "status": "",
+      "subject": {
+        "subid": 26,
+        "subname": "asdf",
+        "usedyear": "2016",
+        "subkind": "subkind",
+        "subsource": "subsource",
+        "subtype": "subtype",
+        "isoutschool": "1",
+        "tid": "1000",
+        "asstid": "1555",
+        "status": "0",
+        "subdirection": "sdds",
+        "subsort": "adsd",
+        "subprog": "ads"
+      }
+    }
+  ]
+}

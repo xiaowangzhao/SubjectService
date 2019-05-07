@@ -51,6 +51,10 @@
         SELECT  codeid, codeno, codename, codevalue, codecontent FROM tb_syscode WHERE codeno=#{codeno} AND codevalue=#{codevalue}
     </select>
 
+  <select id="selectCodeByContent" resultMap="BaseResultMap" parameterType="String">
+        SELECT  codeid, codeno, codename, codevalue, codecontent FROM tb_syscode WHERE codeno=#{codeno} AND codecontent=#{codecontent}
+    </select>
+
   <select id="selectCodeByCodeno" resultMap="BaseResultMap" parameterType="String">
         SELECT  codename, codevalue, codecontent FROM tb_syscode WHERE codeno=#{codeno}
     </select>
