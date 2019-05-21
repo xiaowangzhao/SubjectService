@@ -5,6 +5,7 @@ import com.subject.Exception.ExceptionHandle;
 import com.subject.dto.Result;
 import com.subject.service.SubjectService;
 import com.subject.service.SysarguService;
+import com.subject.util.ExcelUtil;
 import com.subject.util.IpUtil;
 import com.subject.util.ResultUtil;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 
 /**
@@ -71,5 +73,8 @@ public class OpenAPI {
     @RequestMapping(value = "/getallsubject",method = {RequestMethod.GET})
     public Result getAllSubject(){
         return ResultUtil.success(subjectService.selectAll());
+
     }
+
+
 }

@@ -2,8 +2,10 @@ package com.subject.service;
 
 import com.subject.dto.Result;
 import com.subject.model.*;
+import jxl.write.WriteException;
 import org.apache.ibatis.annotations.Param;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -136,10 +138,9 @@ public interface SubjectService {
 
     /**
      * 查询教师课题数目
-     * @param tid, tname
      * @return
      */
-    SubNumByTea getsubnum(String tid, String tname);
+    List<SubNumByTea> getSubNum();
 
 
 
@@ -149,7 +150,7 @@ public interface SubjectService {
      * @param threshold
      * @return
      */
-    List<SubSim> computesimilar(String subname, float threshold);
+    List<SubSim> computeSimilar(String subname, float threshold);
 
     /**
      *  保存前校验
@@ -196,7 +197,7 @@ public interface SubjectService {
      * @param stustatus
      * @return
      */
-    List getStusBySpec(String specid,String classname,String stustatus) throws IOException, Exception;
+    List getStusBySpec(String specid,String classname,String stustatus);
 
 
     /**
@@ -206,5 +207,26 @@ public interface SubjectService {
      */
     List<Subject> getSubByDirection(String subdirection);
 
-    Map<String, Object> getSpecInformation(Long subid) throws IOException;
+    /**
+     * 获取学生已选题列表
+     * @param stuid
+     * @return
+     */
+    List getStuSubList(String stuid) throws IOException;
+
+    /**
+     * 学生换导师
+     * @param subid
+     * @return
+     */
+    int updateSubTeacher( long subid,  String tid);
+
+    /**
+     * 查询课题是否存在临时表
+     * @param subid
+     * @return
+     */
+    Subtemp getSubTemp(long subid);
+
+
 }

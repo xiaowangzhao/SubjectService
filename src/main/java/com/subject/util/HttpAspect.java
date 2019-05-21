@@ -79,6 +79,8 @@ public class HttpAspect {
     //打印输出结果
     @AfterReturning(pointcut = "log()", returning = "object")
     public void doAfterReturing(Object object) {
-        logger.info("response={}", object.toString());
+        if(object != null) {
+            logger.info("response={}", object.toString());
+        }
     }
 }

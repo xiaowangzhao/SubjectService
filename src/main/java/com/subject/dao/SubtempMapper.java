@@ -8,7 +8,7 @@ public interface SubtempMapper {
 
     int insert(Subtemp record);
 
-    Subtemp selectByPrimaryKey(Long subid);
+    Subtemp selectSubjectTemp(Long subid);
 
     List<Subtemp> selectAll();
 

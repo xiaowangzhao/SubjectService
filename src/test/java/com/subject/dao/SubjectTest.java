@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.subject.BaseTest;
 import com.subject.model.*;
+import com.subject.util.GetDataUtil;
 import com.subject.util.JsonUtil;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
@@ -20,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -211,9 +213,44 @@ public class SubjectTest  {
     }
 
     @Test
-    public void test111() {
+    public void test111() throws UnsupportedEncodingException {
         RestTemplate rest = new RestTemplate();
-        String students = rest.getForObject("http://localhost:8084/students", String.class);
-        System.out.println(students);
+        JSONObject students = rest.getForObject("http://localhost:8089/teacher/getteabytno?tno=110002", JSONObject.class);
+        JSONObject t = students.getJSONObject("data");
+        JsonUtil jsonUtil = new JsonUtil();
+        String teaJson1 = GetDataUtil.getData("http://localhost:8089/teacher/gettnamebytno?tno=110004");
+        String teacher = JsonUtil.JsonToObj(teaJson1);
+        System.out.println(t);
+
+        String turl1 = "http://localhost:8089/teacher/getteabytno?tno=110002" ;
+        String turl2 = "http://localhost:8089/teacher/getteabytno?tno=110001" ;
+        String teaJson2 = GetDataUtil.getData(turl1);
+        String teaJson3 = GetDataUtil.getData(turl1);
+
+        System.out.println(teaJson2);
+        System.out.println(teaJson3);
+    }
+
+    @Test
+    public void testUpdateStatus() {
+
+
+//        String url = "http://localhost:8089/teacher/gettnotname";
+//        RestTemplate restTemplate = new RestTemplate();
+//        JSONObject jsonObject = restTemplate.getForObject(url, JSONObject.class);
+//        JSONArray jsonArray = jsonObject.getJSONArray("data");
+//
+//        for(Object obj : jsonArray) {
+//            JSONObject jsonOb = (JSONObject) obj;
+//            String tid = jsonOb.getString("tno");
+//            String tname = jsonOb.getString("tname");
+//            System.out.println(tid + " " + tname);
+//        }
+    }
+
+    @Test
+    public void testUpdateSubTeacher(){
+        int count  = subjectMapper.updateSubTeacher(103L, "004");
+        System.out.println(count);
     }
 }

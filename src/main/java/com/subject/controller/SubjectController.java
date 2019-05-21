@@ -1,21 +1,24 @@
 package com.subject.controller;
 
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.subject.Exception.ExceptionEnum;
+import com.subject.Exception.ExceptionHandle;
 import com.subject.dto.Result;
 import com.subject.model.*;
+import com.subject.service.ExportService;
 import com.subject.service.StusubService;
 import com.subject.service.SubjectService;
 import com.subject.service.SyscodeService;
 import com.subject.util.JsonUtil;
 import com.subject.util.ResultUtil;
+import jxl.write.WriteException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
-import javax.jws.Oneway;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -41,11 +44,11 @@ public class SubjectController {
     @Autowired
     private StusubService stusubService;
 
-    @CrossOrigin
-    @RequestMapping(value = "/subjects",method = {RequestMethod.GET})
-    public Result getSubjects() {
-        return ResultUtil.success(subjectService.selectAll());
-    }
+    @Autowired
+    private ExceptionHandle exceptionHandle;
+
+    @Autowired
+    private ExportService exportService;
 
 
     /**
@@ -53,9 +56,15 @@ public class SubjectController {
      * @param subid
      * @return
      */
-    @RequestMapping(value = "/subjects/{id}",method = {RequestMethod.GET})
-    public Result getSubject(@PathVariable("id") long subid) {
-        return ResultUtil.success(subjectService.getSubject(subid));
+    @RequestMapping(value = "/subjects",method = {RequestMethod.GET})
+    public Result getSubject(@RequestParam(value = "subid") long subid) {
+        Result result = ResultUtil.success();
+        try{
+            result = ResultUtil.success(subjectService.getSubject(subid));
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
+        }
+        return result;
     }
 
     /**
@@ -67,7 +76,13 @@ public class SubjectController {
 
     @RequestMapping(value = "/getsubbytea/{tid}", method = {RequestMethod.GET})
     public Result getSubjects(@PathVariable("tid") String tid) {
-        return ResultUtil.success(subjectService.getSubjects(tid));
+        Result result = ResultUtil.success();
+        try{
+            result = ResultUtil.success(subjectService.getAllinfo(tid));
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
+        }
+        return result;
     }
 
 
@@ -79,11 +94,15 @@ public class SubjectController {
      */
     @RequestMapping(value = "/subjects/{id}", method = {RequestMethod.DELETE})
     public Result delSubject(@PathVariable("id") Long subid) {
-        if(subjectService.delSubject(subid) == 1){
-            return ResultUtil.success("删除成功！");
-        }else {
-            return ResultUtil.error(403,"删除失败");
+        Result result = ResultUtil.success();
+        try{
+            if(subjectService.delSubject(subid) == 1){
+                result = ResultUtil.success("删除成功！");
+            }
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
         }
+        return result;
     }
 
     /**
@@ -91,17 +110,22 @@ public class SubjectController {
      * @param subid
      * @return
      */
-    @RequestMapping(value = "/subjects/{id}", method = {RequestMethod.PUT})
-    public Result submitSubject(@PathVariable("id") long subid){
-        if(subjectService.getSubject(subid) != null) {
-            if(subjectService.submitSubject(subid) != 1){
-                return ResultUtil.error(403,"提交课题状态失败！");
+    @RequestMapping(value = "/subjects", method = {RequestMethod.PUT})
+    public Result submitSubject(@RequestParam("subid") long subid){
+        Result result = ResultUtil.success();
+        try{
+            if(subjectService.getSubject(subid) != null) {
+                if(subjectService.submitSubject(subid) != 0){
+                    return ResultUtil.success("提交课题状态成功！");
+                }
             }else {
-                return ResultUtil.success("提交课题状态成功！");
+                return ResultUtil.error(ExceptionEnum.SUBJECT_NOTEXIST);
             }
-        }else {
-            return ResultUtil.error(403,"提交课题状态失败！");
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
         }
+        return result;
+
     }
 
     /**
@@ -109,15 +133,38 @@ public class SubjectController {
      * @param subid
      * @return
      */
-    @RequestMapping(value = "/subjects/temp/{subid}", method = {RequestMethod.GET})
-    public Result addSubjectTemp(@PathVariable("subid") long subid) {
+    @RequestMapping(value = "/subjects/temp", method = {RequestMethod.GET})
+    public Result addSubjectTemp(@RequestParam(value = "subid", required = true) long subid,
+                                 @RequestParam(value = "condition", required = true) String condition) {
+        Result result = ResultUtil.success();
         try{
-            subjectService.submitSubjectTemp(subjectService.selectBySubid(subid));
-            subjectService.delSubjectBySubid(subid);
+            if(condition.equals("0")) {//状态0为转移课题到暂存库
+                if(subjectService.getSubTemp(subid) == null) {
+                    int status = subjectService.submitSubjectTemp(subjectService.selectBySubid(subid));
+                    int status2 = subjectService.delSubjectBySubid(subid);
+                    if(status != 0 && status2 != 0 ) {
+                        result = ResultUtil.success("转移课题成功！");
+                    }
+                }else {
+                    result = ResultUtil.error(ExceptionEnum.SUBJECT_EXCIT);
+                }
+
+            }else if(condition.equals("1")) {//状态1为复制课题到暂存库
+                if(subjectService.getSubTemp(subid) == null) {
+                    int status = subjectService.submitSubjectTemp(subjectService.selectBySubid(subid));
+                    if(status != 0) {
+                        result = ResultUtil.success("复制课题成功！");
+                    }
+                }else {
+                    result = ResultUtil.error(ExceptionEnum.SUBJECT_EXCIT);
+                }
+
+            }
+
         }catch (Exception e) {
-            return ResultUtil.error(403, "转移课题失败！");
+            result = exceptionHandle.exceptionGet(e);
         }
-        return ResultUtil.success("转移课题成功！");
+        return result;
 
     }
 
@@ -128,35 +175,39 @@ public class SubjectController {
      */
     @RequestMapping(value = "/subjects", method = {RequestMethod.POST})
     public Result addSubject(@RequestBody Map<String, Object> map) {
+        Result result = ResultUtil.success();
         if(!map.isEmpty()) {
             JsonUtil jsonUtil = new JsonUtil();
+            //从map中获取对象
             Subject subject = jsonUtil.mapToObject(map, Subject.class, "subject");
             List<Progress> progressList = jsonUtil.mapToList(map, Progress.class, "progress");
             String specid = jsonUtil.mapToString(map, "specid");
+            //判断是否为空
             if(subject != null && progressList.size() != 0 && specid != null) {
                 if(subject.getSubid() == null) {
                     try{
+                        //保存前校验
                         String viewSubjcet = subjectService.validNewSubject(subject);
                        if(viewSubjcet.equals("1")){
                            subjectService.insertSubject(subject, progressList, specid);
-                           return ResultUtil.success("添加课题成功！");
+                           result =  ResultUtil.success("添加课题成功！");
                        }else{
-                           return ResultUtil.error(403,viewSubjcet);
+                           result =  ResultUtil.error(403,viewSubjcet);
                        }
                     }catch (Exception e) {
-                        return ResultUtil.error(403, "添加课题失败！");
+                        result =  ResultUtil.error(403, "添加课题失败!");
                     }
                 }else {
                     try{
                         subjectService.updateSubject(subject, progressList, specid);
-                        return ResultUtil.success("修改课题成功！");
+                        result =  ResultUtil.success("修改课题成功！");
                     }catch (Exception e) {
-                        return ResultUtil.error(403, "修改课题失败！ ");
+                        result = ResultUtil.error(403, "修改课题失败!");
                     }
                 }
             }
         }
-        return ResultUtil.error(403, "课题不能为空！");
+        return result;
     }
 
     /**
@@ -166,17 +217,18 @@ public class SubjectController {
      */
     @RequestMapping(value = "/auditsubject/teacher/{tid}", method = {RequestMethod.GET})
     public Result getTeaReviewSub(@PathVariable("tid") String tid) {
+        Result result = ResultUtil.success();
         Map<String, Object> map = new HashMap<>();
         try{
             map = subjectService.getTeaReviewSub(tid);
             if(map == null || map.size() == 0) {
-                return ResultUtil.success();
+                result =  ResultUtil.success();
             }
-
+            result = ResultUtil.success(map);
         }catch (Exception e) {
-            return  ResultUtil.error(403, "系统错误！");
+            result =   ResultUtil.error(ExceptionEnum.SERVER_ERROR);
         }
-        return ResultUtil.success(map);
+        return result;
     }
 
     /**
@@ -186,14 +238,16 @@ public class SubjectController {
      */
     @RequestMapping(value = "/auditsubject/teacher", method = {RequestMethod.POST})
     public Result updateReviewOpinion(@RequestBody Map<String, Object> map) {
+        Result result = ResultUtil.success();
         JsonUtil jsonUtil = new JsonUtil();
         List<ReviewSubject> reviewSubjects = jsonUtil.mapToList(map, ReviewSubject.class, "reviewSubjects");
         try{
             subjectService.updateReviewOpinion(reviewSubjects);
+            result = ResultUtil.success("修改意见成功!");
         }catch (Exception e) {
-            return ResultUtil.error(403, "修改意见失败！");
+            result = ResultUtil.error(ExceptionEnum.OPINOIN_UPDATE_FAIL);
         }
-        return ResultUtil.success("修改意见成功!");
+        return result;
     }
 
     /**
@@ -202,12 +256,13 @@ public class SubjectController {
      */
     @RequestMapping(value = "/assignsubject", method = {RequestMethod.GET})
     public Result assignSubject() {
+        Result result = ResultUtil.success();
         try {
-            return ResultUtil.success(subjectService.assignSubject());
+            result =  ResultUtil.success(subjectService.assignSubject());
         } catch (ParseException e) {
-            e.printStackTrace();
+            result = ResultUtil.error(ExceptionEnum.SUBJECT_DIS_FAIL);
         }
-        return ResultUtil.error(403, "课题分配失败！");
+        return result;
     }
 
     /**
@@ -218,19 +273,20 @@ public class SubjectController {
      */
     @RequestMapping(value = "/auditsubject", method = {RequestMethod.POST})
     public Result assignSubject(@RequestBody Map<String, Object> map) {
+        Result result = ResultUtil.success();
         if(map.size() != 0) {
             JsonUtil jsonUtil = new JsonUtil();
             List<Subspec> subspecList = jsonUtil.mapToList(map, Subspec.class, "subspecs");
             try {
                 if(subjectService.auditBarchSub(subspecList) == 0){
-                    return ResultUtil.error(403, "操作失败！");
+                    result =  ResultUtil.error(ExceptionEnum.OPRATION_FAIL);
                 }
-                return ResultUtil.success("操作成功！");
+                result =  ResultUtil.success("操作成功！");
             }catch (Exception e) {
-                return ResultUtil.error(403, "操作失败！");
+                result =  ResultUtil.error(ExceptionEnum.OPRATION_FAIL);
             }
         }
-        return ResultUtil.error(403, "审核课题不能为空！");
+        return result;
     }
 
     /**
@@ -240,13 +296,14 @@ public class SubjectController {
      */
     @RequestMapping(value = "/auditsubject/{id}", method = {RequestMethod.GET})
     public Result assignSubject(@PathVariable("id") long subid) {
+        Result result = ResultUtil.success();
         try {
             subjectService.restoreSubjectStatus(subid);
-            return ResultUtil.success("恢复成功！");
+            result =  ResultUtil.success("恢复成功！");
         }catch (Exception e) {
-            System.out.println(e);
+            result = ResultUtil.error(ExceptionEnum.OPRATION_FAIL);
         }
-        return ResultUtil.error(403, "操作失败！");
+        return result;
     }
 
     /**
@@ -255,22 +312,15 @@ public class SubjectController {
      * @return
      */
     @RequestMapping(value = "/getallsubnum", method = {RequestMethod.GET})
-    public Result getAllsubnum() throws IOException {
-        JSONArray jsonArray = JsonUtil.getTeacher();
-        SubNumByTea subNumByTea;
-        List<SubNumByTea> subNumByTeaList = new ArrayList<>();
+    public Result getAllSubNum() throws IOException {
+        Result result = ResultUtil.success();
         try{
-            for(Object obj : jsonArray) {
-                JSONObject jsonOb = (JSONObject) obj;
-                String tname = jsonOb.getString("tname");
-                String tid = jsonOb.getString("tid");
-                subNumByTea = subjectService.getsubnum(tid, tname);
-                subNumByTeaList.add(subNumByTea);
-            }
+            List<SubNumByTea> subNumByTeaList = subjectService.getSubNum();
+            result = ResultUtil.success(subNumByTeaList);
         }catch (Exception e) {
-            System.out.println(e);
+            result = exceptionHandle.exceptionGet(e);
         }
-        return ResultUtil.success(subNumByTeaList);
+        return result;
     }
 
     /**
@@ -279,6 +329,7 @@ public class SubjectController {
      */
     @RequestMapping(value = "/getallcode", method = {RequestMethod.GET})
     public Result getAllcode() {
+        Result result = ResultUtil.success();
         List codelist = new ArrayList();
         try{
             List<Syscode> ktlb = syscodeService.selectCodeByCodeno("ktlb");
@@ -291,10 +342,11 @@ public class SubjectController {
             codelist.add(ktly);
             codelist.add(ktlx);
             codelist.add(ktfx);
+            result = ResultUtil.success(codelist);
         }catch (Exception e) {
-            return ResultUtil.error(403, "系统错误！");
+            result = ResultUtil.error(ExceptionEnum.SERVER_ERROR);
         }
-       return  ResultUtil.success(codelist);
+       return  result;
     }
 
     /**
@@ -304,8 +356,14 @@ public class SubjectController {
      */
     @RequestMapping(value = "/getsubcount/{id}", method = {RequestMethod.GET})
     public Result getSubjectCount(@PathVariable("id") String tid) {
-        int count = subjectService.selectSubjectCount(tid);
-        return ResultUtil.success(count);
+        Result result = ResultUtil.success();
+        try{
+            result = ResultUtil.success(subjectService.selectSubjectCount(tid));
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
+        }
+
+        return result;
     }
 
     /**
@@ -315,18 +373,31 @@ public class SubjectController {
      */
     @RequestMapping(value = "/select/stu", method = {RequestMethod.POST})
     public Result StuSelectSub(@RequestBody Map<String, Object> map) {
-        String result = null;
+        Result result = ResultUtil.success();
         try{
             JsonUtil jsonUtil = new JsonUtil();
             List<Stusub> stusubs = jsonUtil.mapToList(map, Stusub.class, "stusubs");
-            result = stusubService.insertBatchStuSub(stusubs);
-            if(result.equals("选题成功")) {
-                return ResultUtil.success(result);
-            }
+            result = ResultUtil.success(stusubService.stuSelectSub(stusubs));
         }catch (Exception e) {
-            return ResultUtil.error(403, "选题错误！");
+            result = exceptionHandle.exceptionGet(e);
         }
-        return ResultUtil.error(403, result);
+        return result;
+    }
+
+    /**
+     * 学生选题列表
+     * @param stuid
+     * @return
+     */
+    @RequestMapping(value = "/select/sublist", method = {RequestMethod.GET})
+    public Result StuSelectSubList(@RequestParam(value = "stuid", required = true) String stuid) {
+        Result result = ResultUtil.success();
+        try{
+            result = ResultUtil.success(subjectService.getStuSubList(stuid));
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
+        }
+        return result;
     }
 
     /**
@@ -340,12 +411,14 @@ public class SubjectController {
     public Result TeaSelectStu(@RequestParam(value = "stuid", required =true)String stuid,
                                @RequestParam(value = "subid", required =true)long subid,
                                @RequestParam(value = "status", required =true)int status) {
+        Result result = ResultUtil.success();
         try{
             stusubService.teaPickStu(stuid, subid, status);
+            result = ResultUtil.success("操作成功！");
         }catch (Exception e) {
-            return ResultUtil.error(403, "操作失败！");
+            result = ResultUtil.error(ExceptionEnum.OPRATION_FAIL);
         }
-        return  ResultUtil.success("操作成功！");
+        return  result;
     }
 
     /**
@@ -359,14 +432,16 @@ public class SubjectController {
     @RequestMapping(value = "/getsubsbyspec", method = {RequestMethod.GET})
     public Result getSubsBySpec(@RequestParam(value = "specid", required =true) String specid, @RequestParam(value = "tname", required =false) String tname,
                                 @RequestParam(value = "tdept", required =false) String tdept, @RequestParam(value = "substatus", required =false) String substatus) {
+        Result result = ResultUtil.success();
         List<Subject> subjects;
         try{
             subjects = subjectService.getSubsBySpec(specid, tdept, tname, substatus);
+            result = ResultUtil.success(subjects);
         } catch (Exception e) {
-            return ResultUtil.error(403, "error: " + e);
+            result = ResultUtil.error(ExceptionEnum.SERVER_ERROR);
         }
 
-        return ResultUtil.success(subjects);
+        return result;
     }
 
     /**
@@ -379,14 +454,128 @@ public class SubjectController {
     @RequestMapping(value = "/getsubsbyspecandname", method = {RequestMethod.GET})
     public Result getSubsBySpecAndName(@RequestParam(value = "specid", required =true) String specid,
                                        @RequestParam(value = "subname", required =false) String subname) {
+        Result result = ResultUtil.success();
         List<ReviewSubject> reviewSubjects;
         try{
             reviewSubjects = subjectService.getSubsBySpecAndName(specid, subname);
+            result = ResultUtil.success(reviewSubjects);
         }catch (Exception e) {
-            return ResultUtil.error(403, "查询失败！");
+            result =  ResultUtil.error(ExceptionEnum.SUBJECT_SEARCH_FAIL);
         }
 
-        return ResultUtil.success(reviewSubjects);
+        return result;
+    }
+
+    /**
+     * 获取课题对应的学生
+     * @param subid
+     * @return
+     */
+    @RequestMapping(value = "/getstubysubid", method = {RequestMethod.GET})
+    public Result getStuBySubid(@RequestParam(value = "subid", required = true) Long subid) {
+        Result result = ResultUtil.success();
+        try{
+            result = ResultUtil.success(stusubService.getStuBySubid(subid));
+        }catch (Exception e) {
+            exceptionHandle.exceptionGet(e);
+        }
+        return result;
+    }
+
+    /**
+     * 学生落选，重新选择课题时，清空已选的课题
+     * @param stuid
+     * @return
+     */
+    @RequestMapping(value = "/againselect", method = {RequestMethod.GET})
+    public Result againSelect(@RequestParam(value = "stuid", required = true) String stuid){
+        Result result = ResultUtil.success();
+        try{
+            stusubService.againSelect(stuid);
+            result = ResultUtil.success("操作成功！");
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
+        }
+        return  result;
+    }
+
+    /**
+     * 按专业获得学生当前选题状态
+     * @param specid
+     * @param classname
+     * @param stustatus
+     * @return
+     */
+    @RequestMapping(value = "/getstusbyspec", method = {RequestMethod.GET})
+    public Result getStusBySpec(@RequestParam(value = "specid", required = true) String specid,
+                                @RequestParam(value = "classname", required = false) String classname,
+                                @RequestParam(value = "stustatus", required = false) String stustatus) {
+        Result result = ResultUtil.success();
+        try{
+            result = ResultUtil.success(subjectService.getStusBySpec(specid, classname, stustatus));
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
+        }
+        return result;
+    }
+
+    /**
+     * 学生换导师
+     * @param stuid
+     * @param tid
+     * @return
+     */
+    @RequestMapping(value = "/changetutortorstu", method = {RequestMethod.GET})
+    public Result changeTutorForStu(@RequestParam(value = "stuid", required = true) String stuid,
+                                    @RequestParam(value = "tid", required = true) String tid) {
+        Result result = ResultUtil.success();
+        try{
+            stusubService.changeTutorForStu(stuid, tid);
+            result = ResultUtil.success("操作成功！");
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
+        }
+        return result;
+    }
+
+    /**
+     * 导出课题明细表
+     * @param specid
+     * @param classname
+     * @return
+     */
+    @RequestMapping(value = "/exportstusublist", method = {RequestMethod.GET})
+    public void exportStuSubList2(@RequestParam(value = "specid") String specid,
+                                  @RequestParam(value = "classname", required = false) String classname,
+                                  HttpServletResponse response) {
+        try{
+            exportService.exportStuSubList(specid, classname, response);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
+
+
+
+    /**
+     * 导出任务书（根据教师编号导出该教师的所有任务书-一个excel文件）
+     * @param tid
+     * @return
+     */
+    @RequestMapping(value = "/exporttaskbooksbytid", method = {RequestMethod.GET})
+    public Result exportTaskBooksByTid(@RequestParam(value = "tid") String tid) {
+        Result result = ResultUtil.success();
+        try{
+            exportService.exportTaskBooksByTid(tid);
+            result = ResultUtil.success("导出成功！");
+        } catch (WriteException e) {
+            e.printStackTrace();
+        }catch (Exception e) {
+            result = exceptionHandle.exceptionGet(e);
+        }
+        return result;
     }
 
 }

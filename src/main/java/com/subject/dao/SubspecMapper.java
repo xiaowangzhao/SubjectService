@@ -51,6 +51,13 @@ public interface SubspecMapper {
     List<Subspec> selectAll();
 
     /**
+     * 通过subid获取审核意见
+     * @param subid
+     * @return
+     */
+    String selectAuditoption(Long subid);
+
+    /**
      * 更新
      * @param subspec
      * @return

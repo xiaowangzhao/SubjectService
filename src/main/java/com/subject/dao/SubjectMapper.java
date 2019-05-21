@@ -160,5 +160,17 @@ public interface SubjectMapper {
      */
     int selectNotSelectCountSubject(long sbuid);
 
+    /**
+     * 课题审核全没通过，将status置为1
+     * @param subid
+     * @return
+     */
+    int updateStatus(long subid);
 
+    /**
+     * 学生换导师
+     * @param subid
+     * @return
+     */
+    int updateSubTeacher(@Param("subid") long subid, @Param("tid") String tid);
 }

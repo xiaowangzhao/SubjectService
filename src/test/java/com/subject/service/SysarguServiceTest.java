@@ -19,4 +19,9 @@ public class SysarguServiceTest extends BaseTest {
     public void testIfStartGraduate() throws ParseException {
         System.out.println(sysarguService.ifStartGraduate());
     }
+
+    @Test
+    public void selectSysargu() throws ParseException {
+        System.out.println(sysarguService.selectSysargu("tempfilepath").getArguvalue());
+    }
 }

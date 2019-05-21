@@ -64,7 +64,36 @@ public interface StusubMapper {
      */
     List<Stusub> selectStuStatus(String stuid);
 
+    /**
+     * 获取课题对应的学生
+     * @param subid
+     * @return
+     */
+    List<Stusub> selectStuBySubid(Long subid);
+
+    /**
+     * 判断课题是否已选
+     * @return
+     */
+    Stusub  whetherSelectSub(Long subid);
+
+    /**
+     * 查询学生已选课题
+     * @param stuid
+     * @return
+     */
+    Long selectSub(String stuid);
+
+    /**
+     * 学生落选，重新选择课题时，清空已选的课题
+     * @param stuid
+     * @return
+     */
+    int againSelect(String stuid);
+
     List<Stusub> selectAll();
 
     int updateByPrimaryKey(Stusub record);
+
+
 }

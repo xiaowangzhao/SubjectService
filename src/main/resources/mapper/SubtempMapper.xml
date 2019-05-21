@@ -58,9 +58,8 @@
       subprog = #{subprog,jdbcType=LONGVARCHAR}
     where subid = #{subid,jdbcType=BIGINT}
   </update>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select subid, subname, usedyear, subkind, subsource, subtype, isoutschool, tid, asstid, 
-    status, subdirection, subsort, summary, content, requirement, refpapers, subprog
+  <select id="selectSubjectTemp" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select subid
     from tb_subtemp
     where subid = #{subid,jdbcType=BIGINT}
   </select>

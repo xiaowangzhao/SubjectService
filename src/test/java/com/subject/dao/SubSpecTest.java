@@ -38,8 +38,8 @@ public class SubSpecTest {
     }
 
     @Test
-    public void testSelectById() {
-
+    public void testSelectAuditoption() {
+        System.out.println(subspecMapper.selectAuditoption(74L));
     }
 
     @Test

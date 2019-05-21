@@ -42,10 +42,11 @@
   </update>
 
   <select id="selectBySubid" resultMap="BaseResultMap"  >
-    select subid, specid
+    select subid, specid, auditoption, auditflag, releaseflag
     from tb_subspec
     where subid = #{subid,jdbcType=BIGINT}
   </select>
+
 
   <select id="selectSpec" resultMap="BaseResultMap"  >
     select *
@@ -67,6 +68,12 @@
 
   <select id="selectSpecid" resultType="String" >
     select specid
+    from tb_subspec
+    where subid = #{subid}
+  </select>
+
+  <select id="selectAuditoption" resultType="String" >
+    select auditoption
     from tb_subspec
     where subid = #{subid}
   </select>

@@ -1,6 +1,13 @@
 {
   "teacher": [
     {
+      "tid": "001",
+      "tname": "陈老师",
+      "tdept": "软件工程教研室",
+      "tpost": "教授",
+      "tdegree": 2
+    },
+    {
       "tid": "002",
       "tname": "王老师",
       "tdept": "软件工程教研室",

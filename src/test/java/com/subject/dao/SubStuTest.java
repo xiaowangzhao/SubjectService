@@ -1,9 +1,14 @@
 package com.subject.dao;
 
+import com.alibaba.fastjson.JSONObject;
 import com.subject.BaseTest;
+import com.subject.model.Student;
 import com.subject.model.Stusub;
+import com.subject.util.GetDataUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,4 +91,35 @@ public class SubStuTest  extends BaseTest {
     }
 
 
+    @Test
+    public void testSelectStuBySubid() {
+        System.out.println(stusubMapper.selectStuBySubid(83L));
+    }
+    @Test
+    public void testSelectSub() {
+        System.out.println(stusubMapper.selectSub("20161110002"));
+    }
+
+
+    @Test
+    public void testWhetherSelectSub() {
+        System.out.println(stusubMapper.whetherSelectSub(89L));
+    }
+
+    @Test
+    public void againSelect() {
+        System.out.println(stusubMapper.againSelect("20161110001"));
+
+
+    }
+
+    @Test
+    public void test() {
+        String url = "http://localhost:8089/student/getstubystuid?stuid=20141113035";
+        GetDataUtil getDataUtil = new GetDataUtil();
+        //Student student = (Student) getDataUtil.getObject(url, Student.class);
+        JSONObject jsonObject = GetDataUtil.getJSONObject(url);
+        String tname = GetDataUtil.getTeacherNameByTid("110004");
+        System.out.println(tname);
+    }
 }

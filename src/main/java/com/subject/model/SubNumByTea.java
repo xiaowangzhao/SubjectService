@@ -49,6 +49,18 @@ public class SubNumByTea {
     }
 
     public void setNotAuditSubSum(int notAuditSubSum) {
+
         this.notAuditSubSum = notAuditSubSum;
+    }
+
+    @Override
+    public String toString() {
+        return "SubNumByTea{" +
+                "tid='" + tid + '\'' +
+                ", tname='" + tname + '\'' +
+                ", submitSubSum=" + submitSubSum +
+                ", auditSubSum=" + auditSubSum +
+                ", notAuditSubSum=" + notAuditSubSum +
+                '}';
     }
 }

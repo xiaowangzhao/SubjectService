@@ -65,6 +65,40 @@ public class JsonUtil<T>{
         return t;
     }
 
+    /**
+     * json中取list
+     * @param clazz
+     * @return
+     */
+    public  List<T> JSONToList(String json, Class<T> clazz) {
+        List<T> t = null;
+        JSONObject jsonObject = JSON.parseObject(json);
+        JSONArray array = jsonObject.getJSONArray("data");
+        t = array.toJavaList(clazz);
+        return t;
+    }
+
+    /**
+     * json中取list
+     * @param key
+     * @return
+     */
+    public static List JsonToList(String json, String key) {
+        JSONObject jsonObject = JSON.parseObject(json);
+        JSONArray array = jsonObject.getJSONArray(key);
+        return array;
+    }
+    /**
+     * josn中取obj
+     * @return
+     */
+    public static String JsonToObj(String json) {
+        JSONObject jsonObject = JSON.parseObject(json);
+        String josnData = jsonObject.getString("data");
+        return josnData;
+    }
+
+
     public static JSONArray getTeacher() throws IOException {
 
         File file = ResourceUtils.getFile("classpath:json/teacher.json");

@@ -108,7 +108,14 @@
   <!--提交课题（修改课题提交标志为1）-->
   <update id="submitSubject" parameterType="Long">
         UPDATE tb_subject
-        SET status = 1
+        SET status = "1"
+        WHERE subid=#{subid}
+  </update>
+
+  <!--提交课题（修改课题提交标志为1）-->
+  <update id="updateStatus" parameterType="Long">
+        UPDATE tb_subject
+        SET status = "0"
         WHERE subid=#{subid}
   </update>
 
@@ -179,7 +186,7 @@
   <select id="selectSubsBySpecAndName" parameterType="String" resultType="com.subject.model.ReviewSubject">
         SELECT subid, subname, tid, asstid, reviewerid, ifnull(reviewopinion,'') as reviewopinion
         FROM v_subjectreview
-        WHERE specid=#{specid} AND subname LIKE '%${subname}%'
+        WHERE specid=#{specid} AND subname LIKE "%"#{subname}"%"
     </select>
 
   <!--判断课题的个数-->
@@ -213,4 +220,10 @@
         FROM tb_stusub
         WHERE ifnull(pickflag,'')='')
     </select>
+
+  <update id="updateSubTeacher" >
+        UPDATE tb_subject
+        SET tid = #{tid}
+        WHERE subid=#{subid}
+  </update>
 </mapper>

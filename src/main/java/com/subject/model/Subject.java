@@ -46,7 +46,7 @@ public class Subject {
 
     private List<SubSim> simSubsInHis;//历史中相似的课题
 
-    private List<String> operations;//在不同的状态下可进行的操作集合
+    private String operation;//在不同的状态下可进行的操作集合 状态1未提交：修改、删除、提交、转移到暂存库；状态2已选：2.1（不允许修改任务书）：查看设计情况； 2.2（允许修改任务书）：修改任务书、复制到暂存库、查看设计情况；状态3已有学生初选：选择学生；状态4是否显示“查看审核意见”操作：查看审核意见；状态5审核未通：查看审核意见、修改、删除、提交、转移到暂存库；
 
     private String tnames;
 
@@ -56,12 +56,22 @@ public class Subject {
 
     private String specname;
 
-    public List<String> getOperations() {
-        return operations;
+    private String auditoption;
+
+    public String getAuditoption() {
+        return auditoption;
     }
 
-    public void setOperations(List<String> operations) {
-        this.operations = operations;
+    public void setAuditoption(String auditoption) {
+        this.auditoption = auditoption;
+    }
+
+    public String getOperation() {
+        return operation;
+    }
+
+    public void setOperation(String operation) {
+        this.operation = operation;
     }
 
     public String getSpecname() {
@@ -265,7 +275,6 @@ public class Subject {
     }
 
     public Subject() {
-        operations=new ArrayList<String>();
         simSubsInHis=new ArrayList<SubSim>();
     }
 
@@ -293,11 +302,12 @@ public class Subject {
                 ", condition='" + condition + '\'' +
                 ", reviewopinion='" + reviewopinion + '\'' +
                 ", simSubsInHis=" + simSubsInHis +
-                ", operations=" + operations +
+                ", operation='" + operation + '\'' +
                 ", tnames='" + tnames + '\'' +
                 ", tdept='" + tdept + '\'' +
                 ", tpost='" + tpost + '\'' +
                 ", specname='" + specname + '\'' +
+                ", auditoption='" + auditoption + '\'' +
                 '}';
     }
 }

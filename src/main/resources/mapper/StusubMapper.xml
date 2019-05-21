@@ -14,6 +14,11 @@
     delete from tb_stusub
     where stuid = #{stuid} and pickflag is null or pickflag = '';
   </delete>
+
+  <delete id="againSelect" parameterType="java.lang.String" >
+    delete from tb_stusub
+    where stuid = #{stuid}
+  </delete>
   <insert id="insertStuSub" parameterType="com.subject.model.Stusub" >
     insert into tb_stusub (stusubid, stuid, subid, 
       pickorder, pickflag, operator, 
@@ -40,6 +45,12 @@
   <select id="selectAll" resultMap="BaseResultMap" >
     select stusubid, stuid, subid, pickorder, pickflag, operator, operatedtime
     from tb_stusub
+  </select>
+
+  <select id="selectStuBySubid" resultMap="BaseResultMap" >
+    select stuid
+    from tb_stusub
+    where subid = #{subid}
   </select>
 
   <insert id="insertBatchStuSub" parameterType="java.util.List">
@@ -75,9 +86,17 @@
 
   <select id="selectPickflag" parameterType="long" resultMap="BaseResultMap">
         SELECT * FROM tb_stusub WHERE pickflag='1' and subid=#{subid}
-    </select>
+  </select>
 
   <select id="selectStuStatus" parameterType="String" resultMap="BaseResultMap">
         SELECT * FROM tb_stusub WHERE stuid=#{stuid}
-    </select>
+  </select>
+
+  <select id="whetherSelectSub" resultMap="BaseResultMap">
+        SELECT * FROM tb_stusub WHERE subid=#{subid} and pickflag = "1"
+  </select>
+
+  <select id="selectSub" resultType="Long">
+        SELECT subid FROM tb_stusub WHERE stuid=#{stuid} and pickflag = "1"
+  </select>
 </mapper>
